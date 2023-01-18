@@ -39,12 +39,20 @@ const struct protocol NEC =
  .fmt_func = format_NEC_command
 };
 
+const struct device soundbar =
+{
+ .device = {0xAA, 0xAA},
+ .device_len = 16,
+ .subdevice = {0x88, 0x88, 0x88, 0x88},
+ .subdevice_len = 32,
+ .prot_used = &NEC
+};
+
 const struct command PB_PWR =
 {
- .device = 0x00,
- .subdevice = 0xff,
- .function = 0x40,
- .prot_used = &NEC
+ .function = {0xAA, 0xA8, 0xA2, 0x22, 0x22, 0x28},
+ .function_len = 48,
+ .device = &soundbar
 };
 
 static int16_t convert_to_SPI_envelope(uint8_t *output_buffer,
@@ -66,7 +74,7 @@ static void shift_in_pattern(uint8_t *output, uint16_t *output_index,
 static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffer_size,
                            const struct command *cmd, bool is_ditto)
 {
-    const struct protocol *protocol_used = cmd->prot_used;
+    const struct protocol *protocol_used = cmd->device->prot_used;
     const struct stream_char *cur_char;
     const uint16_t max_buffer_size = *output_buffer_size;
 
@@ -92,15 +100,23 @@ static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffe
     }
     uint8_t remainder = cur_char->lead_in_len % 8;
     if(remainder != 0)
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in[i + 1], remainder);
+        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in[i], remainder);
 
     //create data array from command struct, repeat, reverse and invert data as necessary
 
-    uint8_t input_data[4] = {0x00, 0xff, 0x02, 0xfd};
+//    uint8_t input_data[4] = {0x00, 0xff, 0x02, 0xfd};
+//
+//    convert_to_SPI_envelope(output_buffer, max_buffer_size, &output_buf_index,
+//                            &output_bit_index, input_data, 4,
+//                            &(protocol_used->bin_enc));
 
-    convert_to_SPI_envelope(output_buffer, max_buffer_size, &output_buf_index,
-                            &output_bit_index, input_data, 4,
-                            &(protocol_used->bin_enc));
+    for(i = 0; i < (cmd->function_len / 8); i++){
+
+        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cmd->function[i], 8);
+    }
+    remainder = cmd->function_len % 8;
+    if(remainder != 0)
+        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cmd->function[i], remainder);
 
     for(i = 0; i < (cur_char->lead_out_len / 8); i++){
 //        uint16_t lead_out_pattern = 0;
@@ -187,6 +203,11 @@ next_byte:
     if(*out_bit_index >= pattern_len){
         *out_bit_index = *out_bit_index - pattern_len;
         *(output + *output_index) += (working_pattern << *out_bit_index);
+
+        if(*out_bit_index == 0){
+            *out_bit_index = 8;
+            (*output_index)++;
+        }
     }else{
         pattern_len = pattern_len - *out_bit_index;
         *(output + *output_index) += (working_pattern >> pattern_len);

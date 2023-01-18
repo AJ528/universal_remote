@@ -12,13 +12,20 @@
 #include <stdbool.h>
 
 struct command{
-    uint8_t device;
-    uint8_t subdevice;
-    uint8_t function;
-    const struct protocol *prot_used;
+    uint8_t function[8];
+    uint8_t function_len;
+    const struct device *device;
 };
 
 typedef int16_t format_func(uint8_t *, uint16_t *, const struct command *, bool);
+
+struct device{
+    uint8_t device[4];
+    uint8_t device_len;
+    uint8_t subdevice[4];
+    uint8_t subdevice_len;
+    const struct protocol *prot_used;
+};
 
 //stream characteristics
 struct stream_char{

@@ -120,7 +120,7 @@ int main(void) {
     uint8_t output_buf[32] = {0};
     uint16_t output_buf_size = 32;
 
-    PB_PWR.prot_used->fmt_func(output_buf, &output_buf_size, &PB_PWR, false);
+    PB_PWR.device->prot_used->fmt_func(output_buf, &output_buf_size, &PB_PWR, false);
 
 
     while(1){
