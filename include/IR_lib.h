@@ -30,9 +30,9 @@ struct device{
 //stream characteristics
 struct stream_char{
     uint8_t extent_ms;
-    int8_t lead_in[5];
+    uint8_t lead_in[5];
     uint8_t lead_in_len;
-    int8_t lead_out[5];
+    uint8_t lead_out[5];
     uint8_t lead_out_len;
 };
 

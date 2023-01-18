@@ -55,20 +55,12 @@ const struct command PB_PWR =
  .device = &soundbar
 };
 
-static int16_t convert_to_SPI_envelope(uint8_t *output_buffer,
-                                       uint16_t output_buffer_size,
-                                       uint16_t *output_buffer_index,
-                                       uint8_t *output_bit_index,
-                                       const uint8_t *input_data,
-                                       uint16_t input_data_len,
-                                       const struct binary_encoding *encoding);
+static void append_bits(uint8_t *output, uint16_t *output_index,
+                        uint8_t *output_bit_index, const uint8_t *input,
+                        uint16_t input_bit_len);
 
-
-static void create_pattern(uint16_t *pattern, uint8_t *pattern_len,
-                           const int8_t *encoding, uint8_t enc_len);
-
-static void shift_in_pattern(uint8_t *output, uint16_t *output_index,
-                             uint8_t *out_bit_index, uint16_t pattern,
+static void shift_in_byte(uint8_t *output, uint16_t *output_index,
+                             uint8_t *out_bit_index, uint8_t pattern,
                              uint8_t pat_len);
 
 static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffer_size,
@@ -89,46 +81,11 @@ static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffe
     uint16_t output_buf_index = 0;
     uint8_t output_bit_index = 8;
 
-    uint8_t i = 0;
-
-    for(i = 0; i < (cur_char->lead_in_len / 8); i++){
-//        uint16_t lead_in_pattern = 0;
-//        uint8_t lead_in_pat_len;
-//        create_pattern(&lead_in_pattern, &lead_in_pat_len, &(cur_char->lead_in[i]), 1);
-
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in[i], 8);
-    }
-    uint8_t remainder = cur_char->lead_in_len % 8;
-    if(remainder != 0)
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in[i], remainder);
-
-    //create data array from command struct, repeat, reverse and invert data as necessary
-
-//    uint8_t input_data[4] = {0x00, 0xff, 0x02, 0xfd};
-//
-//    convert_to_SPI_envelope(output_buffer, max_buffer_size, &output_buf_index,
-//                            &output_bit_index, input_data, 4,
-//                            &(protocol_used->bin_enc));
-
-    for(i = 0; i < (cmd->function_len / 8); i++){
-
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cmd->function[i], 8);
-    }
-    remainder = cmd->function_len % 8;
-    if(remainder != 0)
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cmd->function[i], remainder);
-
-    for(i = 0; i < (cur_char->lead_out_len / 8); i++){
-//        uint16_t lead_out_pattern = 0;
-//        uint8_t lead_out_pat_len;
-//        create_pattern(&lead_out_pattern, &lead_out_pat_len, &(cur_char->lead_out[i]), 1);
-
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_out[i], 8);
-    }
-
-    remainder = cur_char->lead_out_len % 8;
-    if(remainder != 0)
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_out[i], remainder);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in, cur_char->lead_in_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cmd->device->device, cmd->device->device_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cmd->device->subdevice, cmd->device->subdevice_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cmd->function, cmd->function_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_out, cur_char->lead_out_len);
 
 
     *output_buffer_size = output_buf_index + 1;
@@ -136,6 +93,97 @@ static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffe
     return (0);
 
 }
+
+static void append_bits(uint8_t *output, uint16_t *output_index,
+                        uint8_t *output_bit_index, const uint8_t *input,
+                        uint16_t input_bit_len)
+{
+    uint8_t i = 0;
+
+    for(i = 0; i < (input_bit_len / 8); i++){
+
+        shift_in_byte(output, output_index, output_bit_index, input[i], 8);
+    }
+    uint8_t remainder = input_bit_len % 8;
+    if(remainder != 0)
+        shift_in_byte(output, output_index, output_bit_index, input[i],
+                      remainder);
+}
+
+//this function assumes that it can write to the next byte after output
+static void shift_in_byte(uint8_t *output, uint16_t *output_index,
+                             uint8_t *out_bit_index, uint8_t pattern,
+                             uint8_t pat_len)
+{
+    uint8_t working_pattern = pattern;
+    uint8_t pattern_len = pat_len;
+
+next_byte:
+    //if the pattern will fit entirely in the working byte
+    if(*out_bit_index >= pattern_len){
+        *out_bit_index = *out_bit_index - pattern_len;
+        *(output + *output_index) += (working_pattern << *out_bit_index);
+
+        if(*out_bit_index == 0){
+            *out_bit_index = 8;
+            (*output_index)++;
+        }
+    }else{
+        pattern_len = pattern_len - *out_bit_index;
+        *(output + *output_index) += (working_pattern >> pattern_len);
+        working_pattern = (working_pattern & ((0x01 << pattern_len) - 1));
+
+        *out_bit_index = 8;
+        (*output_index)++;
+        goto next_byte;
+    }
+}
+
+
+static int16_t convert_to_SPI_envelope(uint8_t *output_buffer,
+                                       uint16_t output_buffer_size,
+                                       uint16_t *output_buffer_index,
+                                       uint8_t *output_bit_index,
+                                       const uint8_t *input_data,
+                                       uint16_t input_data_len,
+                                       const struct binary_encoding *encoding);
+
+
+static void create_pattern(uint16_t *pattern, uint8_t *pattern_len,
+                           const int8_t *encoding, uint8_t enc_len);
+
+static void create_pattern(uint16_t *pattern, uint8_t *pattern_len,
+                           const int8_t *encoding, uint8_t enc_len)
+{
+    *pattern = 0;
+    *pattern_len = 0;
+
+    uint16_t local_pattern = 0;
+    uint8_t local_pattern_len = 0;
+
+    if(enc_len == 0)
+        return;
+
+    uint8_t i = 0;
+
+    while(i < enc_len){
+
+        if(encoding[i] != 0){
+            bool is_positive = (encoding[i] > 0);
+            uint8_t j = abs(encoding[i]);
+
+            local_pattern = local_pattern << j;
+            local_pattern_len += j;
+            if(is_positive)
+                local_pattern += (0x01 << j) - 1;
+        }
+        i++;
+    }
+
+    *pattern_len = local_pattern_len;
+    *pattern = local_pattern;
+}
+
 
 static int16_t convert_to_SPI_envelope(uint8_t *output_buffer,
                                        uint16_t output_buffer_size,
@@ -175,11 +223,11 @@ static int16_t convert_to_SPI_envelope(uint8_t *output_buffer,
 
             if(working_number & 0x80){
                 //shift one pattern in
-                shift_in_pattern(output_buffer, output_buffer_index,
+                shift_in_byte(output_buffer, output_buffer_index,
                                  output_bit_index, one_pattern, one_pat_len);
             }else{
                 //shift zero pattern in
-                shift_in_pattern(output_buffer, output_buffer_index,
+                shift_in_byte(output_buffer, output_buffer_index,
                                  output_bit_index, zero_pattern, zero_pat_len);
             }
             working_number = working_number << 1;
@@ -189,68 +237,3 @@ static int16_t convert_to_SPI_envelope(uint8_t *output_buffer,
     }
     return (0);
 }
-
-//this function assumes that it can write to the next 2 bytes after output
-static void shift_in_pattern(uint8_t *output, uint16_t *output_index,
-                             uint8_t *out_bit_index, uint16_t pattern,
-                             uint8_t pat_len)
-{
-    uint16_t working_pattern = pattern;
-    uint8_t pattern_len = pat_len;
-
-next_byte:
-    //if the pattern will fit entirely in the working byte
-    if(*out_bit_index >= pattern_len){
-        *out_bit_index = *out_bit_index - pattern_len;
-        *(output + *output_index) += (working_pattern << *out_bit_index);
-
-        if(*out_bit_index == 0){
-            *out_bit_index = 8;
-            (*output_index)++;
-        }
-    }else{
-        pattern_len = pattern_len - *out_bit_index;
-        *(output + *output_index) += (working_pattern >> pattern_len);
-        working_pattern = (working_pattern & ((0x01 << pattern_len) - 1));
-
-        *out_bit_index = 8;
-        (*output_index)++;
-        goto next_byte;
-
-//        shift_in_pattern(output, output_index, out_bit_index, working_pattern,
-//                         pattern_len);
-    }
-}
-
-static void create_pattern(uint16_t *pattern, uint8_t *pattern_len,
-                           const int8_t *encoding, uint8_t enc_len)
-{
-    *pattern = 0;
-    *pattern_len = 0;
-
-    uint16_t local_pattern = 0;
-    uint8_t local_pattern_len = 0;
-
-    if(enc_len == 0)
-        return;
-
-    uint8_t i = 0;
-
-    while(i < enc_len){
-
-        if(encoding[i] != 0){
-            bool is_positive = (encoding[i] > 0);
-            uint8_t j = abs(encoding[i]);
-
-            local_pattern = local_pattern << j;
-            local_pattern_len += j;
-            if(is_positive)
-                local_pattern += (0x01 << j) - 1;
-        }
-        i++;
-    }
-
-    *pattern_len = local_pattern_len;
-    *pattern = local_pattern;
-}
-
