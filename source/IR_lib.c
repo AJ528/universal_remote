@@ -31,9 +31,9 @@ const struct protocol NEC =
  .primary_stream =
  {
   .extent_ms = 0,
-  .lead_in = {16, -8},
-  .lead_in_len = 2,
-  .lead_out = {1},
+  .lead_in = {0xff, 0xff, 0x00},
+  .lead_in_len = 24,
+  .lead_out = {0x01},
   .lead_out_len = 1
  },
  .fmt_func = format_NEC_command
@@ -83,13 +83,16 @@ static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffe
 
     uint8_t i = 0;
 
-    for(i = 0; i < cur_char->lead_in_len; i++){
-        uint16_t lead_in_pattern = 0;
-        uint8_t lead_in_pat_len;
-        create_pattern(&lead_in_pattern, &lead_in_pat_len, &(cur_char->lead_in[i]), 1);
+    for(i = 0; i < (cur_char->lead_in_len / 8); i++){
+//        uint16_t lead_in_pattern = 0;
+//        uint8_t lead_in_pat_len;
+//        create_pattern(&lead_in_pattern, &lead_in_pat_len, &(cur_char->lead_in[i]), 1);
 
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, lead_in_pattern, lead_in_pat_len);
+        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in[i], 8);
     }
+    uint8_t remainder = cur_char->lead_in_len % 8;
+    if(remainder != 0)
+        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in[i + 1], remainder);
 
     //create data array from command struct, repeat, reverse and invert data as necessary
 
@@ -99,14 +102,17 @@ static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffe
                             &output_bit_index, input_data, 4,
                             &(protocol_used->bin_enc));
 
-    for(i = 0; i < cur_char->lead_out_len; i++){
-        uint16_t lead_out_pattern = 0;
-        uint8_t lead_out_pat_len;
-        create_pattern(&lead_out_pattern, &lead_out_pat_len, &(cur_char->lead_out[i]), 1);
+    for(i = 0; i < (cur_char->lead_out_len / 8); i++){
+//        uint16_t lead_out_pattern = 0;
+//        uint8_t lead_out_pat_len;
+//        create_pattern(&lead_out_pattern, &lead_out_pat_len, &(cur_char->lead_out[i]), 1);
 
-        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, lead_out_pattern, lead_out_pat_len);
+        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_out[i], 8);
     }
 
+    remainder = cur_char->lead_out_len % 8;
+    if(remainder != 0)
+        shift_in_pattern(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_out[i], remainder);
 
 
     *output_buffer_size = output_buf_index + 1;
