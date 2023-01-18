@@ -1,0 +1,6 @@
+
+*.TMP
+.settings/
+
+Debug/
+Release/
