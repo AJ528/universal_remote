@@ -110,17 +110,17 @@ int main(void) {
     SysCtl_enableInfrared();
 
 
-//    EUSCI_A_SPI_enable(EUSCI_A0_BASE);
+    EUSCI_A_SPI_enable(EUSCI_A0_BASE);
+
+    EUSCI_A_SPI_enableInterrupt(EUSCI_A0_BASE, EUSCI_A_SPI_TRANSMIT_INTERRUPT);
+
+    __enable_interrupt();
+
+
+//    uint8_t output_buf[32] = {0};
+//    uint16_t output_buf_size = 32;
 //
-//    EUSCI_A_SPI_enableInterrupt(EUSCI_A0_BASE, EUSCI_A_SPI_TRANSMIT_INTERRUPT);
-//
-//    __enable_interrupt();
-
-
-    uint8_t output_buf[32] = {0};
-    uint16_t output_buf_size = 32;
-
-    PB_PWR.prot_used->fmt_func(output_buf, &output_buf_size, &PB_PWR, false);
+//    PB_PWR.prot_used->fmt_func(output_buf, &output_buf_size, &PB_PWR, false);
 
 
     while(1){
