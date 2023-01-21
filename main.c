@@ -15,14 +15,8 @@
 #define CS_MCLK_FLLREF_RATIO 31
 
 #define OUTPUT_BUF_SIZE     32
-#define TXDATA_LEN  17
 
-static const uint8_t TXData[TXDATA_LEN] =
-{
- 0xFF, 0xFF, 0x00, 0xAA, 0xAA, 0x88, 0x88, 0x88,
- 0x88, 0xAA, 0xA8, 0xA2, 0x22, 0x22, 0x28, 0x80,
- 0x00
-};
+uint8_t output_buf[OUTPUT_BUF_SIZE] = {0};
 
 uint8_t TXData_index = 0;
 uint16_t TXData_size;
@@ -30,8 +24,6 @@ uint16_t TXData_size;
 //Variable to store current Clock values
 uint32_t mclockValue = 0;
 uint32_t smclockValue = 0;
-
-uint8_t output_buf[OUTPUT_BUF_SIZE] = {0};
 
 
 int main(void) {
@@ -76,20 +68,8 @@ int main(void) {
     mclockValue = CS_getMCLK();
     smclockValue = CS_getSMCLK();
 
-//    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P1, GPIO_PIN0, GPIO_PRIMARY_MODULE_FUNCTION);
-//
-//    SysCtl_setInfraredConfig(SYSCTL_INFRAREDDATASOURCE_CONFIG, SYSCTL_INFRAREDMODE_FSK, SYSCTL_INFRAREDPOLARITY_NORMAL);
-//
-//    SysCtl_enableInfrared();
-
-
-//    EUSCI_A_SPI_enable(EUSCI_A0_BASE);
-//
-//    EUSCI_A_SPI_enableInterrupt(EUSCI_A0_BASE, EUSCI_A_SPI_TRANSMIT_INTERRUPT);
-//
-//    __enable_interrupt();
-
-    int16_t result = PB_PWR.device->prot_used->fmt_func(output_buf, OUTPUT_BUF_SIZE, &PB_PWR, false);
+//    int16_t result = SB_PWR.device->prot_used->fmt_func(output_buf, OUTPUT_BUF_SIZE, &SB_PWR, false);
+    int16_t result = SB_test.device->prot_used->fmt_func(output_buf, OUTPUT_BUF_SIZE, &SB_test, false);
 
     if(result > 0){
         TXData_size = result;

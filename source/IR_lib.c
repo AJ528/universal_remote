@@ -25,13 +25,6 @@ const struct protocol NEC =
  .unit_freq = 1773,
  .LSB = true,
  .has_ditto = false,
-// .bin_enc =
-// {
-//  .zero_encoding = {1, -1},
-//  .zero_enc_len = 2,
-//  .one_encoding = {1, -3},
-//  .one_enc_len = 2
-// },
  .primary_stream =
  {
   .extent_ms = 0,
@@ -52,10 +45,17 @@ const struct device soundbar =
  .prot_used = &NEC
 };
 
-const struct command PB_PWR =
+const struct command SB_PWR =
 {
  .function = {0xAA, 0xA8, 0xA2, 0x22, 0x22, 0x28},
  .function_len = 48,
+ .device = &soundbar
+};
+
+const struct command SB_test =
+{
+ .function = {0x22, 0xff, 0xa0, 0x51, 0x68, 0x99, 0x50},
+ .function_len = 52,
  .device = &soundbar
 };
 

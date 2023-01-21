@@ -40,19 +40,11 @@ struct stream_char{
  * limit encoding array such that SUM(abs(encoding_arr[i])) <= 16
  */
 
-struct binary_encoding{
-    int8_t zero_encoding[5];
-    uint8_t zero_enc_len;
-    int8_t one_encoding[5];
-    uint8_t one_enc_len;
-};
-
 struct protocol{
     uint16_t carrier_freq;
     uint16_t unit_freq;
     bool LSB;
     bool has_ditto;
-    struct binary_encoding bin_enc;
     struct stream_char primary_stream;
     struct stream_char ditto_stream;
     format_func *fmt_func;
@@ -60,6 +52,8 @@ struct protocol{
 
 //extern const struct protocol NEC;
 extern const struct command PB_PWR;
+
+extern const struct command SB_test;
 
 
 #endif /* INCLUDE_IR_LIB_H_ */
