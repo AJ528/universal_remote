@@ -106,10 +106,7 @@ int main(void) {
 
 
     while(1){
-        if(TXData_index == TXData_size - 1){
-            disable_SPI();
-            disable_SPI_int();
-        }
+
     }
 
 }
@@ -121,12 +118,19 @@ __interrupt void USCI_A0_ISR(void)
     {
         case USCI_SPI_UCTXIFG:      // UCTXIFG
 
+            if(TXData_index == TXData_size){
+                disable_SPI();
+                disable_SPI_int();
+            }else{
+                UCA0TXBUF = ~(output_buf[TXData_index]);
+            }
+
             //Send next value
 //            EUSCI_A_SPI_transmitData(EUSCI_A0_BASE, ~(TXData[TXData_index]));
-            UCA0TXBUF = ~(output_buf[TXData_index]);
 
-            if(TXData_index < TXData_size - 1)
+            if(TXData_index < TXData_size)
                 TXData_index++;
+
             break;
         default:
             break;
