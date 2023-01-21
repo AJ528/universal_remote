@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+
 uint16_t find_best_prescaler(uint32_t src_clk, uint16_t target_clk)
 {
     uint16_t initial_div = src_clk / target_clk;

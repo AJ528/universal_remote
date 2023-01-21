@@ -6,13 +6,17 @@
  */
 
 #include "IR_lib.h"
+#include "timer.h"
+#include "SPI.h"
 
 #include "driverlib.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffer_size,
+//static uint32_t SMCLK_freq;
+
+static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                            const struct command *cmd, bool is_ditto);
 
 const struct protocol NEC =
@@ -21,13 +25,13 @@ const struct protocol NEC =
  .unit_freq = 1773,
  .LSB = true,
  .has_ditto = false,
- .bin_enc =
- {
-  .zero_encoding = {1, -1},
-  .zero_enc_len = 2,
-  .one_encoding = {1, -3},
-  .one_enc_len = 2
- },
+// .bin_enc =
+// {
+//  .zero_encoding = {1, -1},
+//  .zero_enc_len = 2,
+//  .one_encoding = {1, -3},
+//  .one_enc_len = 2
+// },
  .primary_stream =
  {
   .extent_ms = 0,
@@ -63,20 +67,24 @@ static void shift_in_byte(uint8_t *output, uint16_t *output_index,
                              uint8_t *out_bit_index, uint8_t pattern,
                              uint8_t pat_len);
 
-static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffer_size,
+static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                            const struct command *cmd, bool is_ditto)
 {
     const struct protocol *protocol_used = cmd->device->prot_used;
     const struct stream_char *cur_char;
-    const uint16_t max_buffer_size = *output_buffer_size;
+    const uint32_t SMCLK_freq = CS_getSMCLK();
 
     if(is_ditto)
         cur_char = &(protocol_used->ditto_stream);
     else
         cur_char = &(protocol_used->primary_stream);
 
-
     //set up carrier freq and SPI timing
+    stop_carrier_wave();
+    enable_carrier_wave(SMCLK_freq, protocol_used->carrier_freq);
+
+    disable_SPI();
+    set_unit_freq(SMCLK_freq, protocol_used->unit_freq);
 
     uint16_t output_buf_index = 0;
     uint8_t output_bit_index = 8;
@@ -87,11 +95,11 @@ static int16_t format_NEC_command(uint8_t *output_buffer, uint16_t *output_buffe
     append_bits(output_buffer, &output_buf_index, &output_bit_index, cmd->function, cmd->function_len);
     append_bits(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_out, cur_char->lead_out_len);
 
+    output_buf_index++;
+    output_buffer[output_buf_index] = 0x00;
 
-    *output_buffer_size = output_buf_index + 1;
 
-    return (0);
-
+    return (output_buf_index + 1);
 }
 
 static void append_bits(uint8_t *output, uint16_t *output_index,

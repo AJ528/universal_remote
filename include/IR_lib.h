@@ -17,7 +17,7 @@ struct command{
     const struct device *device;
 };
 
-typedef int16_t format_func(uint8_t *, uint16_t *, const struct command *, bool);
+typedef int16_t format_func(uint8_t *, uint16_t, const struct command *, bool);
 
 struct device{
     uint8_t device[4];

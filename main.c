@@ -1,5 +1,6 @@
 
 #include "IR_lib.h"
+#include "SPI.h"
 
 #include "driverlib.h"
 
@@ -13,6 +14,7 @@
 //MCLK/FLLRef Ratio
 #define CS_MCLK_FLLREF_RATIO 31
 
+#define OUTPUT_BUF_SIZE     32
 #define TXDATA_LEN  17
 
 static const uint8_t TXData[TXDATA_LEN] =
@@ -22,12 +24,14 @@ static const uint8_t TXData[TXDATA_LEN] =
  0x00
 };
 
-uint8_t TXData_Index = 0;
+uint8_t TXData_index = 0;
+uint16_t TXData_size;
 
 //Variable to store current Clock values
 uint32_t mclockValue = 0;
 uint32_t smclockValue = 0;
 
+uint8_t output_buf[OUTPUT_BUF_SIZE] = {0};
 
 
 int main(void) {
@@ -72,42 +76,11 @@ int main(void) {
     mclockValue = CS_getMCLK();
     smclockValue = CS_getSMCLK();
 
-
-    Timer_A_outputPWMParam A0_pwm_param =
-    {
-     .clockSource = TIMER_A_CLOCKSOURCE_SMCLK,
-     .clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_1,
-     .timerPeriod = 26,         //for 27 counts
-     .compareRegister = TIMER_A_CAPTURECOMPARE_REGISTER_2,
-     .compareOutputMode = TIMER_A_OUTPUTMODE_RESET_SET,
-     .dutyCycle = 7
-    };
-
-    Timer_A_outputPWM(TIMER_A0_BASE, &A0_pwm_param);
-
-    Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
-
-//    EUSCI_A_SPI_initMasterParam spi_param =
-//    {
-//     .selectClockSource = EUSCI_A_SPI_CLOCKSOURCE_SMCLK,
-//     .clockSourceFrequency = clockValue,
-//     .desiredSpiClock = 1786,
-//     .msbFirst = EUSCI_A_SPI_MSB_FIRST,
-//     .clockPhase = EUSCI_A_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT,
-//     .clockPolarity = EUSCI_A_SPI_CLOCKPOLARITY_INACTIVITY_LOW,
-//     .spiMode = EUSCI_A_SPI_3PIN
-//    };
+//    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P1, GPIO_PIN0, GPIO_PRIMARY_MODULE_FUNCTION);
 //
-//    EUSCI_A_SPI_initMaster(EUSCI_A0_BASE, &spi_param);
-
-    UCA0CTLW0 = 0x2981;
-    UCA0BRW = 569;
-
-    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P1, GPIO_PIN0, GPIO_PRIMARY_MODULE_FUNCTION);
-
-    SysCtl_setInfraredConfig(SYSCTL_INFRAREDDATASOURCE_CONFIG, SYSCTL_INFRAREDMODE_FSK, SYSCTL_INFRAREDPOLARITY_NORMAL);
-
-    SysCtl_enableInfrared();
+//    SysCtl_setInfraredConfig(SYSCTL_INFRAREDDATASOURCE_CONFIG, SYSCTL_INFRAREDMODE_FSK, SYSCTL_INFRAREDPOLARITY_NORMAL);
+//
+//    SysCtl_enableInfrared();
 
 
 //    EUSCI_A_SPI_enable(EUSCI_A0_BASE);
@@ -116,21 +89,30 @@ int main(void) {
 //
 //    __enable_interrupt();
 
+    int16_t result = PB_PWR.device->prot_used->fmt_func(output_buf, OUTPUT_BUF_SIZE, &PB_PWR, false);
 
-    uint8_t output_buf[32] = {0};
-    uint16_t output_buf_size = 32;
+    if(result > 0){
+        TXData_size = result;
+        TXData_index = 0;
+        enable_SPI();
+        enable_SPI_int();
 
-    PB_PWR.device->prot_used->fmt_func(output_buf, &output_buf_size, &PB_PWR, false);
+        GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P1, GPIO_PIN0, GPIO_PRIMARY_MODULE_FUNCTION);
+        SysCtl_setInfraredConfig(SYSCTL_INFRAREDDATASOURCE_CONFIG, SYSCTL_INFRAREDMODE_FSK, SYSCTL_INFRAREDPOLARITY_NORMAL);
+        SysCtl_enableInfrared();
+
+        __enable_interrupt();
+    }
 
 
     while(1){
-        if(TXData_Index == TXDATA_LEN){
-            EUSCI_A_SPI_disable(EUSCI_A0_BASE);
+        if(TXData_index == TXData_size - 1){
+            disable_SPI();
+            disable_SPI_int();
         }
     }
 
 }
-
 
 #pragma vector=USCI_A0_VECTOR
 __interrupt void USCI_A0_ISR(void)
@@ -140,10 +122,11 @@ __interrupt void USCI_A0_ISR(void)
         case USCI_SPI_UCTXIFG:      // UCTXIFG
 
             //Send next value
-            EUSCI_A_SPI_transmitData(EUSCI_A0_BASE, ~(TXData[TXData_Index]));
+//            EUSCI_A_SPI_transmitData(EUSCI_A0_BASE, ~(TXData[TXData_index]));
+            UCA0TXBUF = ~(output_buf[TXData_index]);
 
-            if(TXData_Index < TXDATA_LEN - 1)
-                TXData_Index++;
+            if(TXData_index < TXData_size - 1)
+                TXData_index++;
             break;
         default:
             break;
