@@ -8,52 +8,15 @@
 #ifndef INCLUDE_IR_LIB_H_
 #define INCLUDE_IR_LIB_H_
 
+#include "cmd_prot_structs.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
-struct command{
-    uint8_t function[8];
-    uint8_t function_len;
-    const struct device *device;
-};
-
-typedef int16_t format_func(uint8_t *, uint16_t, const struct command *, bool);
-
-struct device{
-    uint8_t device[4];
-    uint8_t device_len;
-    uint8_t subdevice[4];
-    uint8_t subdevice_len;
-    const struct protocol *prot_used;
-};
-
-//stream characteristics
-struct stream_char{
-    uint8_t extent_ms;
-    uint8_t lead_in[5];
-    uint8_t lead_in_len;
-    uint8_t lead_out[5];
-    uint8_t lead_out_len;
-};
-
-/*
- * limit encoding array such that SUM(abs(encoding_arr[i])) <= 16
- */
-
-struct protocol{
-    uint16_t carrier_freq;
-    uint16_t unit_freq;
-    bool LSB;
-    bool has_ditto;
-    struct stream_char primary_stream;
-    struct stream_char ditto_stream;
-    format_func *fmt_func;
-};
-
-//extern const struct protocol NEC;
-extern const struct command PB_PWR;
-
-extern const struct command SB_test;
+int16_t format_sony20_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+                           const struct command *cmd, bool is_ditto);
+int16_t format_NEC_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+                           const struct command *cmd, bool is_ditto);
 
 
 #endif /* INCLUDE_IR_LIB_H_ */

@@ -5,10 +5,53 @@
  *      Author: adevries
  */
 
+#include "sys_clk.h"
+
+#include "driverlib.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 
+
+#define XT1CLK_FREQ     32768
+
+//Target frequency for MCLK in kHz
+#define CS_MCLK_DESIRED_FREQUENCY_IN_KHZ 1000
+//MCLK/FLLRef Ratio
+#define CS_MCLK_FLLREF_RATIO 31
+
+
+
+void init_sys_clk(void)
+{
+    // Configure Pins for XIN
+    //Set P4.1 and P4.2 as Module Function Input.
+    /*
+
+    * Select Port 4
+    * Set Pin 1, 2 to input Module Function, (XIN).
+    */
+    GPIO_setAsPeripheralModuleFunctionInputPin(
+        GPIO_PORT_P4,
+        GPIO_PIN1 + GPIO_PIN2,
+        GPIO_PRIMARY_MODULE_FUNCTION
+    );
+
+    CS_setExternalClockSource(XT1CLK_FREQ);
+
+    CS_turnOnXT1LF(CS_XT1_DRIVE_3);
+
+    // Set DCO FLL reference = XT1CLK
+    CS_initClockSignal(CS_FLLREF, CS_XT1CLK_SELECT, CS_CLOCK_DIVIDER_1);
+    // Set ACLK = XT1CLK
+    CS_initClockSignal(CS_ACLK, CS_XT1CLK_SELECT, CS_CLOCK_DIVIDER_1);
+
+    // Set Ratio and Desired MCLK Frequency and initialize DCO
+    CS_initFLLSettle(CS_MCLK_DESIRED_FREQUENCY_IN_KHZ, CS_MCLK_FLLREF_RATIO);
+
+    CS_initClockSignal(CS_MCLK, CS_DCOCLKDIV_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal(CS_SMCLK, CS_DCOCLKDIV_SELECT, CS_CLOCK_DIVIDER_1);
+}
 
 uint16_t find_best_prescaler(uint32_t src_clk, uint16_t target_clk)
 {
