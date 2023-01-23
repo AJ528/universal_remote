@@ -17,7 +17,16 @@ struct command{
     const struct device *device;
 };
 
-typedef int16_t format_func(uint8_t *, uint16_t, const struct command *, bool);
+//stream characteristics
+struct stream_char{
+    uint16_t extent_ms;
+    uint8_t lead_in[5];
+    uint8_t lead_in_len;
+    uint8_t lead_out[5];
+    uint8_t lead_out_len;
+};
+
+typedef int16_t format_func(uint8_t *, uint16_t, const struct stream_char *, const struct command *, bool);
 
 struct device{
     uint8_t device[4];
@@ -25,15 +34,6 @@ struct device{
     uint8_t subdevice[4];
     uint8_t subdevice_len;
     const struct protocol *prot_used;
-};
-
-//stream characteristics
-struct stream_char{
-    uint8_t extent_ms;
-    uint8_t lead_in[5];
-    uint8_t lead_in_len;
-    uint8_t lead_out[5];
-    uint8_t lead_out_len;
 };
 
 struct protocol{
@@ -47,8 +47,13 @@ struct protocol{
 };
 
 extern const struct command SB_PWR;
-extern const struct command SB_test;
 
 extern const struct command BR_PWR;
+extern const struct command BR_PWR_ON;
+extern const struct command BR_PWR_OFF;
+
+extern const struct command TV_PWR;
+extern const struct command TV_PWR2;
+
 
 #endif /* INCLUDE_CMD_PROT_STRUCTS_H_ */
