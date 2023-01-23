@@ -91,26 +91,40 @@ int16_t execute_command(const struct command *cmd, bool is_ditto)
     return (0);
 }
 
+uint8_t reverse(uint8_t x)
+{
+    x = (((x & 0xaa) >> 1) | ((x & 0x55) << 1));
+    x = (((x & 0xcc) >> 2) | ((x & 0x33) << 2));
+    x = (((x & 0xf0) >> 4) | ((x & 0x0f) << 4));
+    return x;
+
+}
+
+void create_function(uint8_t *output, uint8_t input)
+{
+    uint8_t flipped_input = reverse(input);
+    uint16_t f_in_inv = ((uint16_t)flipped_input << 8) | (~flipped_input & 0xff);
+    uint8_t bit = 0;
+
+    uint16_t output_index = 0;
+    uint8_t output_bit_index = 8;
+
+    while(bit < 16){
+        if(f_in_inv & 0x8000)
+            shift_in_byte(output, &output_index, &output_bit_index, 0x80, 4);
+        else
+            shift_in_byte(output, &output_index, &output_bit_index, 0x80, 2);
+
+        f_in_inv = f_in_inv << 1;
+        bit++;
+    }
+
+}
+
 int16_t format_sony20_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                               const struct stream_char *cur_char,
                               const struct command *cmd, bool is_ditto)
 {
-//    const struct protocol *protocol_used = cmd->device->prot_used;
-//    const struct stream_char *cur_char;
-//    const uint32_t SMCLK_freq = CS_getSMCLK();
-//
-//    if(is_ditto)
-//        cur_char = &(protocol_used->ditto_stream);
-//    else
-//        cur_char = &(protocol_used->primary_stream);
-//
-//    //set up carrier freq and SPI timing
-//    stop_carrier_wave();
-//    enable_carrier_wave(SMCLK_freq, protocol_used->carrier_freq);
-//
-//    disable_SPI();
-//    set_unit_freq(SMCLK_freq, protocol_used->unit_freq);
-
     uint16_t output_buf_index = 0;
     uint8_t output_bit_index = 8;
 
@@ -127,30 +141,10 @@ int16_t format_sony20_command(uint8_t *output_buffer, uint16_t output_buffer_siz
     return (output_buf_index + 1);
 }
 
-int16_t format_NEC_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+int16_t format_NEC1_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                            const struct stream_char *cur_char,
                            const struct command *cmd, bool is_ditto)
 {
-//    const struct protocol *protocol_used = cmd->device->prot_used;
-//    const struct stream_char *cur_char;
-//    const uint32_t SMCLK_freq = CS_getSMCLK();
-//
-//    if(is_ditto){
-//        if(protocol_used->has_ditto == true)
-//            cur_char = &(protocol_used->ditto_stream);
-//        else
-//            cur_char = &(protocol_used->primary_stream);
-//    }else{
-//        cur_char = &(protocol_used->primary_stream);
-//    }
-//
-//    //set up carrier freq and SPI timing
-//    stop_carrier_wave();
-//    enable_carrier_wave(SMCLK_freq, protocol_used->carrier_freq);
-//
-//    disable_SPI();
-//    set_unit_freq(SMCLK_freq, protocol_used->unit_freq);
-
     uint16_t output_buf_index = 0;
     uint8_t output_bit_index = 8;
 
@@ -164,6 +158,39 @@ int16_t format_NEC_command(uint8_t *output_buffer, uint16_t output_buffer_size,
         append_bits(output_buffer, &output_buf_index, &output_bit_index,
                     cmd->function, cmd->function_len);
     }
+    append_bits(output_buffer, &output_buf_index, &output_bit_index,
+                cur_char->lead_out, cur_char->lead_out_len);
+
+    output_buf_index++;
+    output_buffer[output_buf_index] = 0x00;
+
+    return (output_buf_index + 1);
+}
+
+int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+                           const struct stream_char *cur_char,
+                           const struct command *cmd, bool is_ditto)
+{
+    uint16_t output_buf_index = 0;
+    uint8_t output_bit_index = 8;
+    uint8_t function[6] = {0};
+
+    static uint8_t i = 0x1f;
+
+    create_function(function, i);
+
+    i++;
+
+    append_bits(output_buffer, &output_buf_index, &output_bit_index,
+                cur_char->lead_in, cur_char->lead_in_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index,
+                cmd->device->device, cmd->device->device_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index,
+                cmd->device->subdevice, cmd->device->subdevice_len);
+    //        append_bits(output_buffer, &output_buf_index, &output_bit_index,
+    //                    cmd->function, cmd->function_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index,
+                function, 48);
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
                 cur_char->lead_out, cur_char->lead_out_len);
 

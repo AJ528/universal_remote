@@ -16,6 +16,7 @@ static const struct device bluray;
 
 static const struct protocol sony20;
 static const struct protocol NEC1;
+static const struct protocol NEC2;
 
 
 const struct command BR_PWR =
@@ -66,7 +67,7 @@ static const struct device toshiba_tv =
  .device_len = 18,
  .subdevice = {0x88, 0x88, 0x88, 0xa0},
  .subdevice_len = 30,
- .prot_used = &NEC1
+ .prot_used = &NEC2
 };
 
 static const struct device soundbar =
@@ -93,11 +94,10 @@ static const struct protocol NEC1 =
  .carrier_freq = 38000,
  .unit_freq = 1773,
  .LSB = true,
- .has_ditto = false,
+ .has_ditto = true,
  .primary_stream =
  {
   .extent_ms = 108,
-//  .extent_ms = 1000,
   .lead_in = {0xff, 0xff, 0x00},
   .lead_in_len = 24,
   .lead_out = {0x80},
@@ -111,7 +111,25 @@ static const struct protocol NEC1 =
   .lead_out = {0x80},
   .lead_out_len = 1
  },
- .fmt_func = format_NEC_command
+ .fmt_func = format_NEC1_command
+};
+
+//IRP notation: {38.0k,564}<1,-1|1,-3>(16,-8,D:8,S:8,F:8,~F:8,1,^108m)+
+static const struct protocol NEC2 =
+{
+ .carrier_freq = 38000,
+ .unit_freq = 1773,
+ .LSB = true,
+ .has_ditto = false,
+ .primary_stream =
+ {
+  .extent_ms = 108,
+  .lead_in = {0xff, 0xff, 0x00},
+  .lead_in_len = 24,
+  .lead_out = {0x80},
+  .lead_out_len = 1
+ },
+ .fmt_func = format_NEC2_command
 };
 
 //IRP notation: {40k,600}<1,-1|2,-1>(4,-1,F:7,D:5,S:8,^45m)+

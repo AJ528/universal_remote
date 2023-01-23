@@ -28,11 +28,12 @@ int main(void) {
 
 
 
-//    execute_command(&SB_PWR, false);
-    execute_command(&TV_PWR2, false);
 
     while(1){
 
+        execute_command(&TV_PWR, false);
+
+//        __delay_cycles(1000000);
     }
 
 

@@ -13,11 +13,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+void create_function(uint8_t *output, uint8_t input);
+
 int16_t execute_command(const struct command *cmd, bool is_ditto);
 int16_t format_sony20_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                               const struct stream_char *cur_char,
                               const struct command *cmd, bool is_ditto);
-int16_t format_NEC_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+int16_t format_NEC1_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+                           const struct stream_char *cur_char,
+                           const struct command *cmd, bool is_ditto);
+int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                            const struct stream_char *cur_char,
                            const struct command *cmd, bool is_ditto);
 
