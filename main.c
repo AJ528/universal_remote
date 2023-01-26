@@ -14,6 +14,7 @@ int main(void) {
     WDT_A_hold(WDT_A_BASE);
 
     GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+//    GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
     GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
 
     PMM_unlockLPM5();
@@ -26,14 +27,13 @@ int main(void) {
     SysCtl_enableInfrared();
     __enable_interrupt();
 
-
+    execute_command(&SB_PWR, false);
 
 
     while(1){
 
-        execute_command(&TV_PWR, false);
 
-//        __delay_cycles(1000000);
+
     }
 
 

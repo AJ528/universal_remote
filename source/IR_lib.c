@@ -173,13 +173,13 @@ int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
 {
     uint16_t output_buf_index = 0;
     uint8_t output_bit_index = 8;
-    uint8_t function[6] = {0};
+//    uint8_t function[6] = {0};
+//
+//    static uint8_t i = 0x19;
+//
+//    create_function(function, i);
 
-    static uint8_t i = 0x1f;
-
-    create_function(function, i);
-
-    i++;
+//    i++;
 
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
                 cur_char->lead_in, cur_char->lead_in_len);
@@ -187,10 +187,10 @@ int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                 cmd->device->device, cmd->device->device_len);
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
                 cmd->device->subdevice, cmd->device->subdevice_len);
-    //        append_bits(output_buffer, &output_buf_index, &output_bit_index,
-    //                    cmd->function, cmd->function_len);
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
-                function, 48);
+                cmd->function, cmd->function_len);
+//    append_bits(output_buffer, &output_buf_index, &output_bit_index,
+//                function, 48);
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
                 cur_char->lead_out, cur_char->lead_out_len);
 
