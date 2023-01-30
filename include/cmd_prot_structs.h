@@ -47,6 +47,8 @@ struct protocol{
 };
 
 extern const struct command SB_PWR;
+extern const struct command SB_VLUP;
+extern const struct command SB_VLDN;
 
 extern const struct command BR_PWR;
 extern const struct command BR_PWR_ON;

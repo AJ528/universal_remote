@@ -47,6 +47,20 @@ const struct command SB_PWR =
  .device = &soundbar
 };
 
+const struct command SB_VLUP =
+{
+ .function = {0x8a, 0xaa, 0x2a, 0x22, 0x22, 0x28},
+ .function_len = 48,
+ .device = &soundbar
+};
+
+const struct command SB_VLDN =
+{
+ .function = {0x8a, 0x2a, 0x8a, 0x8a, 0x22, 0x28},
+ .function_len = 48,
+ .device = &soundbar
+};
+
 const struct command TV_PWR =
 {
  .function = {0xa2, 0xa2, 0xa8, 0xa2, 0x28, 0x88},

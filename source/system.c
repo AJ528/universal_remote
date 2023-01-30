@@ -5,7 +5,7 @@
  *      Author: adevries
  */
 
-#include "sys_clk.h"
+#include "system.h"
 
 #include "driverlib.h"
 
@@ -51,6 +51,24 @@ void init_sys_clk(void)
 
     CS_initClockSignal(CS_MCLK, CS_DCOCLKDIV_SELECT, CS_CLOCK_DIVIDER_1);
     CS_initClockSignal(CS_SMCLK, CS_DCOCLKDIV_SELECT, CS_CLOCK_DIVIDER_1);
+}
+
+void sys_clk_LPM_prep(void)
+{
+    CS_initClockSignal(CS_FLLREF, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal(CS_ACLK, CS_VLOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_turnOffXT1();
+}
+
+void system_LPM_prep(void)
+{
+    RTCCTL = 0x00;
+    LCDCTL0 = 0x00;
+    WDT_A_hold(WDT_A_BASE);
+
+    __disable_interrupt();
+
+    PMM_turnOffRegulator();
 }
 
 uint16_t find_best_prescaler(uint32_t src_clk, uint16_t target_clk)

@@ -5,9 +5,11 @@
  *      Author: adevries
  */
 
+
 #include "IR_lib.h"
 #include "timer.h"
 #include "SPI.h"
+#include "GPIO.h"
 
 #include "driverlib.h"
 #include <stdint.h>
@@ -20,6 +22,10 @@ uint8_t output_buf[OUTPUT_BUF_SIZE] = {0};
 
 uint8_t TXData_index = 0;
 uint16_t TXData_size;
+
+static const struct command *cmd_to_execute = NULL;
+static bool cmd_is_ditto = false;
+
 
 static void append_bits(uint8_t *output, uint16_t *output_index,
                         uint8_t *output_bit_index, const uint8_t *input,
@@ -89,6 +95,22 @@ int16_t execute_command(const struct command *cmd, bool is_ditto)
     reset_extent_passed();
 
     return (0);
+}
+
+void IR_lib_set_next_command(const struct command *cmd, bool is_ditto)
+{
+    cmd_to_execute = cmd;
+    cmd_is_ditto = is_ditto;
+}
+
+void check_for_command(void)
+{
+    if(cmd_to_execute != NULL){
+        execute_command(cmd_to_execute, cmd_is_ditto);
+        cmd_to_execute = NULL;
+        enable_GPIO_ints();
+    }
+
 }
 
 uint8_t reverse(uint8_t x)
