@@ -14,50 +14,46 @@
 
 
 #define XT1CLK_FREQ     32768
+#define MCLK_FREQ_MHZ   1
+#define FLL_Ref_Freq    32768
+#define FLL_Softtrim_Delay_cycles    24         // delay 24 cycles of FLL reference clock
+#define FLL_Softtrim_Delay  (FLL_Softtrim_Delay_cycles*1000000/FLL_Ref_Freq)*MCLK_FREQ_MHZ  // delay for FLL lock
 
-//Target frequency for MCLK in kHz
-#define CS_MCLK_DESIRED_FREQUENCY_IN_KHZ 1000
-//MCLK/FLLRef Ratio
-#define CS_MCLK_FLLREF_RATIO 31
+// Statically-initialized variable for DCO tap stored when FLL locked
+#pragma NOINIT(CSCTL0_cal_val)        // variable in FRAM for FLL locked DCO tap value
+#pragma LOCATION(CSCTL0_cal_val, 0x1800)  // define the variable in information memory
+uint16_t CSCTL0_cal_val;
 
+#pragma NOINIT(CSCTL1_cal_val)    // variable in FRAM for FLL locked DCOFTRIM and DCORSEL value
+#pragma LOCATION(CSCTL1_cal_val, 0x1802) // define the variable in information memory
+uint16_t CSCTL1_cal_val;
 
+#pragma NOINIT(calibration_valid)                  // Flag of FLL locked DCO tap, FTRIM and RSEL stored in the FRAM
+#pragma LOCATION(calibration_valid, 0x1804)            // define the variable in information memory
+uint8_t calibration_valid;
 
 void init_sys_clk(void)
 {
-    // Configure Pins for XIN
-    //Set P4.1 and P4.2 as Module Function Input.
-    /*
+    CSCTL7 &= ~(XT1OFFG | DCOFFG);      // Clear XT1 and DCO fault flag
 
-    * Select Port 4
-    * Set Pin 1, 2 to input Module Function, (XIN).
-    */
-    GPIO_setAsPeripheralModuleFunctionInputPin(
-        GPIO_PORT_P4,
-        GPIO_PIN1 + GPIO_PIN2,
-        GPIO_PRIMARY_MODULE_FUNCTION
-    );
+    __bis_SR_register(SCG0);                           // disable FLL
+    CSCTL3 = SELREF__REFOCLK;                         // Set REFO as FLL reference source
+    CSCTL0 = DCO1;                                        // clear DCO and MOD registers
+    if(calibration_valid != 0xff){
+        CSCTL0 = CSCTL0_cal_val;
+        CSCTL1 = CSCTL1_cal_val;
+    }else{
+        CSCTL1 = DCOFTRIM_3 | DCORSEL_0 | DISMOD;
+    }
+    CSCTL2 = FLLD_0 + 30;                             // DCOCLKDIV = 1 MHz
+    __delay_cycles(3);
+    __bic_SR_register(SCG0);                           // enable FLL
+    __delay_cycles(10);
+    while(CSCTL7 & (FLLUNLOCK0 | FLLUNLOCK1));         // FLL locked
 
-    CS_setExternalClockSource(XT1CLK_FREQ);
+    CSCTL4 = SELMS__DCOCLKDIV | SELA__REFOCLK;        // set default REFO(~32768Hz) as ACLK source, ACLK = 32768Hz
+    CSCTL5 = VLOAUTOOFF | DIVM__1 | DIVS__1;          // default DCOCLKDIV as MCLK and SMCLK source
 
-    CS_turnOnXT1LF(CS_XT1_DRIVE_3);
-
-    // Set DCO FLL reference = XT1CLK
-    CS_initClockSignal(CS_FLLREF, CS_XT1CLK_SELECT, CS_CLOCK_DIVIDER_1);
-    // Set ACLK = XT1CLK
-    CS_initClockSignal(CS_ACLK, CS_XT1CLK_SELECT, CS_CLOCK_DIVIDER_1);
-
-    // Set Ratio and Desired MCLK Frequency and initialize DCO
-    CS_initFLLSettle(CS_MCLK_DESIRED_FREQUENCY_IN_KHZ, CS_MCLK_FLLREF_RATIO);
-
-    CS_initClockSignal(CS_MCLK, CS_DCOCLKDIV_SELECT, CS_CLOCK_DIVIDER_1);
-    CS_initClockSignal(CS_SMCLK, CS_DCOCLKDIV_SELECT, CS_CLOCK_DIVIDER_1);
-}
-
-void sys_clk_LPM_prep(void)
-{
-    CS_initClockSignal(CS_FLLREF, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1);
-    CS_initClockSignal(CS_ACLK, CS_VLOCLK_SELECT, CS_CLOCK_DIVIDER_1);
-    CS_turnOffXT1();
 }
 
 void system_LPM_prep(void)
@@ -68,7 +64,7 @@ void system_LPM_prep(void)
 
     __disable_interrupt();
 
-    PMM_turnOffRegulator();
+//    PMM_turnOffRegulator();
 }
 
 uint16_t find_best_prescaler(uint32_t src_clk, uint16_t target_clk)

@@ -6,7 +6,7 @@
  */
 
 #include "SPI.h"
-#include "sys_clk.h"
+#include "system.h"
 
 #include <msp430.h>
 #include <stdint.h>
