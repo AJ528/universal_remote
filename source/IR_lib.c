@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "SPI.h"
 #include "GPIO.h"
+#include "cmd_prot_structs.h"
 
 #include "driverlib.h"
 #include <stdint.h>

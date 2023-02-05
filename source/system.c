@@ -52,14 +52,15 @@ void init_sys_clk(void)
     while(CSCTL7 & (FLLUNLOCK0 | FLLUNLOCK1));         // FLL locked
 
     CSCTL4 = SELMS__DCOCLKDIV | SELA__REFOCLK;        // set default REFO(~32768Hz) as ACLK source, ACLK = 32768Hz
+    //to avoid errata #PMM32 keep SMCLK = MCLK
     CSCTL5 = VLOAUTOOFF | DIVM__1 | DIVS__1;          // default DCOCLKDIV as MCLK and SMCLK source
 
 }
 
 void system_LPM_prep(void)
 {
-    RTCCTL = 0x00;
-    LCDCTL0 = 0x00;
+//    RTCCTL = 0x00;
+//    LCDCTL0 = 0x00;
     WDT_A_hold(WDT_A_BASE);
 
     __disable_interrupt();

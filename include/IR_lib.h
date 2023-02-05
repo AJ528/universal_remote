@@ -15,6 +15,8 @@
 
 void create_function(uint8_t *output, uint8_t input);
 
+const struct command * get_command(uint16_t button_num);
+
 int16_t execute_command(const struct command *cmd, bool is_ditto);
 void IR_lib_set_next_command(const struct command *cmd, bool is_ditto);
 void check_for_command(void);

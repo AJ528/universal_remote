@@ -23,12 +23,11 @@ void init_GPIO(void)
     P1DIR = 0xff;
     P2DIR = (BIT7 | BIT6);
     P3DIR = 0xff;
-//    P4DIR = 0xfd;
     P4DIR = 0xff;
     P5DIR = 0xff;
     P6DIR = 0xff;
     P7DIR = 0xff;
-    P8DIR = 0x0f;
+    P8DIR = 0xff;
 
     P1OUT = 0x00;
 
@@ -59,7 +58,7 @@ uint16_t scan_for_pressed_button(void)
         if(input != 0){  //a button has been pressed
             bit_pos = get_bit_pos(input);
             if(bit_pos != -1)
-                button_num = (i << 3) + (bit_pos);
+                button_num = (bit_pos << 3) + i;
             return button_num;
         }
         out_mask = out_mask << 1;
