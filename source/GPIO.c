@@ -6,7 +6,7 @@
  */
 
 #include "GPIO.h"
-#include "cmd_prot_structs.h"
+#include "cmd_assoc_structs.h"
 #include "IR_lib.h"
 
 #include <msp430.h>
@@ -102,7 +102,12 @@ void disable_GPIO_ints(void)
 
 void GPIO_LPM_prep(void)
 {
-    PASEL0 = 0x0000;
+    /*
+     * technically, you get the lowest power draw by setting
+     * all PXSEL0 to 0's. However, I haven't noticed any extra
+     * current draw by leaving P1SEL0.0 set to 1.
+     */
+    PASEL0 = 0x0001;
     PBSEL0 = 0x0000;
     PCSEL0 = 0x0000;
     PDSEL0 = 0x0000;

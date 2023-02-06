@@ -10,7 +10,8 @@
 #include "timer.h"
 #include "SPI.h"
 #include "GPIO.h"
-#include "cmd_prot_structs.h"
+#include "cmd_assoc_structs.h"
+#include "device_protocol_structs.h"
 
 #include "driverlib.h"
 #include <stdint.h>
@@ -24,8 +25,7 @@ uint8_t output_buf[OUTPUT_BUF_SIZE] = {0};
 uint8_t TXData_index = 0;
 uint16_t TXData_size;
 
-static const struct command *cmd_to_execute = NULL;
-static bool cmd_is_ditto = false;
+static struct command const *prev_cmd = 0;
 
 
 static void append_bits(uint8_t *output, uint16_t *output_index,
@@ -36,6 +36,41 @@ static void shift_in_byte(uint8_t *output, uint16_t *output_index,
                              uint8_t *out_bit_index, uint8_t pattern,
                              uint8_t pat_len);
 static void clear_buffer(uint8_t *buffer, uint16_t size);
+
+int16_t handle_btn_assoc(struct btn_assoc const *container)
+{
+    struct cmd_seq const *cmd_seq_to_execute;
+    struct command const *cmd_to_execute;
+    uint8_t iteration_limit = 1;
+    uint8_t i = 0;
+
+    if(container->type == cmd_seq){
+        cmd_seq_to_execute = (struct cmd_seq const *)container->action;
+        iteration_limit = cmd_seq_to_execute->sequence_len;
+        cmd_to_execute = cmd_seq_to_execute->sequence[0];
+    }else{
+        cmd_to_execute = (struct command const *)container->action;
+    }
+
+    while(i < iteration_limit){
+        if(cmd_to_execute == prev_cmd)
+            execute_command(cmd_to_execute, true);
+        else
+            execute_command(cmd_to_execute, false);
+
+        prev_cmd = cmd_to_execute;
+        i++;
+        if(container->type == cmd_seq)
+            cmd_to_execute = cmd_seq_to_execute->sequence[i];
+    }
+
+    return (0);
+}
+
+inline void reset_prev_cmd(void)
+{
+    prev_cmd = 0;
+}
 
 int16_t execute_command(const struct command *cmd, bool is_ditto)
 {
@@ -85,63 +120,18 @@ int16_t execute_command(const struct command *cmd, bool is_ditto)
 
     clear_buffer(output_buf, TXData_size);
 
-    while(extent_passed() == false){
-        __no_operation();
-    }
+//    while(extent_passed() == false){
+//        __no_operation();
+//    }
 
-//    if(extent_passed() == false)
-//        //enter LPM3 and wait for the extent time period to pass
-//        __bis_SR_register(LPM3_bits);
+    if(extent_passed() == false){
+        //enter LPM3 and wait for the extent time period to pass
+        __bis_SR_register(LPM3_bits);
+    }
 
     reset_extent_passed();
 
     return (0);
-}
-
-void IR_lib_set_next_command(const struct command *cmd, bool is_ditto)
-{
-    cmd_to_execute = cmd;
-    cmd_is_ditto = is_ditto;
-}
-
-void check_for_command(void)
-{
-    if(cmd_to_execute != NULL){
-        execute_command(cmd_to_execute, cmd_is_ditto);
-        cmd_to_execute = NULL;
-        enable_GPIO_ints();
-    }
-
-}
-
-uint8_t reverse(uint8_t x)
-{
-    x = (((x & 0xaa) >> 1) | ((x & 0x55) << 1));
-    x = (((x & 0xcc) >> 2) | ((x & 0x33) << 2));
-    x = (((x & 0xf0) >> 4) | ((x & 0x0f) << 4));
-    return x;
-
-}
-
-void create_function(uint8_t *output, uint8_t input)
-{
-    uint8_t flipped_input = reverse(input);
-    uint16_t f_in_inv = ((uint16_t)flipped_input << 8) | (~flipped_input & 0xff);
-    uint8_t bit = 0;
-
-    uint16_t output_index = 0;
-    uint8_t output_bit_index = 8;
-
-    while(bit < 16){
-        if(f_in_inv & 0x8000)
-            shift_in_byte(output, &output_index, &output_bit_index, 0x80, 4);
-        else
-            shift_in_byte(output, &output_index, &output_bit_index, 0x80, 2);
-
-        f_in_inv = f_in_inv << 1;
-        bit++;
-    }
-
 }
 
 int16_t format_sony20_command(uint8_t *output_buffer, uint16_t output_buffer_size,
@@ -196,13 +186,6 @@ int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
 {
     uint16_t output_buf_index = 0;
     uint8_t output_bit_index = 8;
-//    uint8_t function[6] = {0};
-//
-//    static uint8_t i = 0x19;
-//
-//    create_function(function, i);
-
-//    i++;
 
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
                 cur_char->lead_in, cur_char->lead_in_len);
@@ -212,8 +195,6 @@ int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                 cmd->device->subdevice, cmd->device->subdevice_len);
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
                 cmd->function, cmd->function_len);
-//    append_bits(output_buffer, &output_buf_index, &output_bit_index,
-//                function, 48);
     append_bits(output_buffer, &output_buf_index, &output_bit_index,
                 cur_char->lead_out, cur_char->lead_out_len);
 

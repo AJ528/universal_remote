@@ -17,9 +17,6 @@ static bool local_extent_passed = false;
 
 void enable_carrier_wave(uint32_t SMCLK_freq, uint16_t desired_freq)
 {
-//    uint16_t period = 26;
-//    uint16_t period = (SMCLK_freq / desired_freq) - 1;
-
     uint16_t period = find_best_prescaler(SMCLK_freq, desired_freq);
 
     TA0CCR0 = period;      //period

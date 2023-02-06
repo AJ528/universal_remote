@@ -8,18 +8,17 @@
 #ifndef INCLUDE_IR_LIB_H_
 #define INCLUDE_IR_LIB_H_
 
-#include "cmd_prot_structs.h"
+#include "device_protocol_structs.h"
+#include "cmd_assoc_structs.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
-void create_function(uint8_t *output, uint8_t input);
+const struct btn_assoc * get_command(uint16_t button_num);
 
-const struct command * get_command(uint16_t button_num);
-
+int16_t handle_btn_assoc(struct btn_assoc const *container);
 int16_t execute_command(const struct command *cmd, bool is_ditto);
-void IR_lib_set_next_command(const struct command *cmd, bool is_ditto);
-void check_for_command(void);
+inline void reset_prev_cmd(void);
 int16_t format_sony20_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                               const struct stream_char *cur_char,
                               const struct command *cmd, bool is_ditto);
