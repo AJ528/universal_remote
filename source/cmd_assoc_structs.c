@@ -104,7 +104,6 @@ const struct btn_assoc btn_0x27 =
 static struct command const *const watch_CC_seq[] =
 {
  &TV_PWR_ON,
- &TV_INPUT_HDMI3,
  &SB_PWR_TOG
 };
 
