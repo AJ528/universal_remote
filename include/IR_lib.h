@@ -28,6 +28,9 @@ int16_t format_NEC1_command(uint8_t *output_buffer, uint16_t output_buffer_size,
 int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                            const struct stream_char *cur_char,
                            const struct command *cmd, bool is_ditto);
+int16_t format_space_heater_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+                              const struct stream_char *cur_char,
+                              const struct command *cmd, bool is_ditto);
 
 
 #endif /* INCLUDE_IR_LIB_H_ */

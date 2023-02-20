@@ -18,6 +18,10 @@ static const struct command BR_PWR_TOG;
 static const struct command BR_PWR_ON;
 static const struct command BR_PWR_OFF;
 
+static const struct command SH_PWR_TOG;
+static const struct command SH_HL_TOG;
+static const struct command SH_OSC;
+
 static const struct command TV_PWR_TOG;
 static const struct command TV_PWR_ON;
 static const struct command TV_PWR_OFF;
@@ -27,9 +31,17 @@ static const struct command TV_UP;
 static const struct command TV_DOWN;
 static const struct command TV_SELECT;
 
+static const struct command SAM_TV_PWR_TOG;
+
 static const struct cmd_seq watch_CC;
 static const struct cmd_seq MASTER_OFF;
 
+
+const struct btn_assoc btn_0x00 =
+{
+ .action = (void *)&SH_PWR_TOG,
+ .type = command
+};
 
 const struct btn_assoc btn_0x04 =
 {
@@ -75,7 +87,7 @@ const struct btn_assoc btn_0x10 =
 
 const struct btn_assoc btn_0x12 =
 {
- .action = (void *)&TV_PWR_TOG,
+ .action = (void *)&SAM_TV_PWR_TOG,
  .type = command
 };
 
@@ -83,6 +95,18 @@ const struct btn_assoc btn_0x17 =
 {
  .action = (void *)&watch_CC,
  .type = cmd_seq
+};
+
+const struct btn_assoc btn_0x1F =
+{
+ .action = (void *)&SH_OSC,
+ .type = command
+};
+
+const struct btn_assoc btn_0x20 =
+{
+ .action = (void *)&SH_HL_TOG,
+ .type = command
 };
 
 const struct btn_assoc btn_0x22 =
@@ -185,6 +209,31 @@ static const struct command SB_MUTE =
 };
 
 /*
+ * Space Heater Commands
+ */
+
+static const struct command SH_PWR_TOG =
+{
+ .function = {0xe8, 0x88, 0x88, 0x8e},
+ .function_len = 32,
+ .device = &space_heater
+};
+
+static const struct command SH_HL_TOG =
+{
+ .function = {0xe8, 0x88, 0x8e, 0x88},
+ .function_len = 32,
+ .device = &space_heater
+};
+
+static const struct command SH_OSC =
+{
+ .function = {0xe8, 0x88, 0xe8, 0x88},
+ .function_len = 32,
+ .device = &space_heater
+};
+
+/*
  * TV Commands
  */
 
@@ -244,3 +293,14 @@ static const struct command TV_SELECT =
  .device = &toshiba_tv
 };
 
+
+/*
+ * Work Samsung TV Commands
+ */
+
+static const struct command SAM_TV_PWR_TOG =
+{
+ .function = {0xa2, 0xaa, 0xa2, 0x88, 0x88, 0x88},
+ .function_len = 48,
+ .device = &work_samsung_tv
+};

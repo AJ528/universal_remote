@@ -10,7 +10,7 @@
 
 static struct btn_assoc const *const button_map[64] =
 {
- 0,     //0
+ &btn_0x00,     //0
  0,
  0,
  0,
@@ -41,8 +41,8 @@ static struct btn_assoc const *const button_map[64] =
  0,
  0,
  0,
- 0,
- 0,     //0x20
+ &btn_0x1F,
+ &btn_0x20,     //0x20
  0,
  &btn_0x22,
  0,

@@ -14,7 +14,16 @@ const struct device toshiba_tv =
  .device_len = 18,
  .subdevice = {0x88, 0x88, 0x88, 0xa0},
  .subdevice_len = 30,
- .prot_used = &NEC2
+ .prot_used = &NEC1
+};
+
+const struct device work_samsung_tv =
+{
+ .device = {0x88, 0x8A, 0xA8},
+ .device_len = 22,
+ .subdevice = {0x88, 0x8A, 0xA8},
+ .subdevice_len = 22,
+ .prot_used = &NECx2
 };
 
 const struct device soundbar =
@@ -33,6 +42,15 @@ const struct device bluray =
  .subdevice = {0xb5, 0x5b, 0x60},
  .subdevice_len = 20,
  .prot_used = &sony20
+};
+
+const struct device space_heater =
+{
+ .device = {0x8e},
+ .device_len = 8,
+ .subdevice = {0},
+ .subdevice_len = 0,
+ .prot_used = &space_heater_protocol
 };
 
 //IRP notation: {38.0k,564}<1,-1|1,-3>(16,-8,D:8,S:8,F:8,~F:8,1,^108m,(16,-4,1,^108m)*)
@@ -71,8 +89,27 @@ const struct protocol NEC2 =
  .primary_stream =
  {
   .extent_ms = 108,
+//  .extent_ms = 500,
   .lead_in = {0xff, 0xff, 0x00},
   .lead_in_len = 24,
+  .lead_out = {0x80},
+  .lead_out_len = 1
+ },
+ .fmt_func = format_NEC2_command
+};
+
+//IRP notation: {38.4k,564}<1,-1|1,-3>(8,-8,D:8,S:8,F:8,~F:8,1,^108m)+
+const struct protocol NECx2 =
+{
+ .carrier_freq = 38400,
+ .unit_freq = 1773,
+ .LSB = true,
+ .has_ditto = false,
+ .primary_stream =
+ {
+  .extent_ms = 108,
+  .lead_in = {0xff, 0x00},
+  .lead_in_len = 16,
   .lead_out = {0x80},
   .lead_out_len = 1
  },
@@ -96,3 +133,22 @@ const struct protocol sony20 =
  },
  .fmt_func = format_sony20_command
 };
+
+
+const struct protocol space_heater_protocol =
+{
+ .carrier_freq = 38000,
+ .unit_freq = 2440,
+ .LSB = true,
+ .has_ditto = false,
+ .primary_stream =
+ {
+  .extent_ms = 26,
+  .lead_in = {0xee},
+  .lead_in_len = 8,
+  .lead_out = {0x00},
+  .lead_out_len = 0
+ },
+ .fmt_func = format_space_heater_command
+};
+

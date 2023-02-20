@@ -27,7 +27,7 @@ int main(void) {
     while(1){
 
         uint16_t button_num = scan_for_pressed_button();
-        if(button_num != 0){
+        if(button_num != 0xffff){
             action = get_command(button_num);
             if(action != 0){
                 handle_btn_assoc(action);
@@ -36,6 +36,8 @@ int main(void) {
             reset_prev_cmd();
             GPIO_LPM_prep();
             system_LPM_prep();
+            //temporarily using LMP0 instead of LPM4
+//            __bis_SR_register(LPM0_bits | GIE);
             __bis_SR_register(LPM4_bits | GIE);
         }
         __no_operation();

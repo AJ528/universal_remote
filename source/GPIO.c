@@ -41,7 +41,7 @@ void init_GPIO(void)
 
 // scans the array of buttons and returns the
 // value of the first button pressed
-// if none are pressed, returns 0
+// if none are pressed, returns 0xffff
 uint16_t scan_for_pressed_button(void)
 {
     static const uint8_t in_mask = (0x01 << MATRIX_NUM_ROWS) - 1;
@@ -49,7 +49,7 @@ uint16_t scan_for_pressed_button(void)
     uint8_t out_mask = BIT0;
     uint8_t input;
     int8_t bit_pos;
-    uint16_t button_num = 0;
+    uint16_t button_num = 0xffff;
 
     while(out_mask != 0){
         P3OUT = ~(out_mask);
@@ -112,7 +112,8 @@ void GPIO_LPM_prep(void)
     PCSEL0 = 0x0000;
     PDSEL0 = 0x0000;
 
-    PAOUT = 0x0000;
+//    PAOUT = 0x0000;
+    PAOUT = 0x0008;
     PBOUT = 0x0000;
     PCOUT = 0x0000;
     PDOUT = 0x0000;

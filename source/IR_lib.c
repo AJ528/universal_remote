@@ -127,6 +127,8 @@ int16_t execute_command(const struct command *cmd, bool is_ditto)
     if(extent_passed() == false){
         //enter LPM3 and wait for the extent time period to pass
         __bis_SR_register(LPM3_bits);
+        //temporarily using LMP0 instead of LPM3
+//        __bis_SR_register(LPM0_bits);
     }
 
     reset_extent_passed();
@@ -200,6 +202,24 @@ int16_t format_NEC2_command(uint8_t *output_buffer, uint16_t output_buffer_size,
 
     output_buf_index++;
     output_buffer[output_buf_index] = 0x00;
+
+    return (output_buf_index + 1);
+}
+
+int16_t format_space_heater_command(uint8_t *output_buffer, uint16_t output_buffer_size,
+                              const struct stream_char *cur_char,
+                              const struct command *cmd, bool is_ditto)
+{
+    uint16_t output_buf_index = 0;
+    uint8_t output_bit_index = 8;
+
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cur_char->lead_in, cur_char->lead_in_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cmd->device->device, cmd->device->device_len);
+    append_bits(output_buffer, &output_buf_index, &output_bit_index, cmd->function, cmd->function_len);
+
+    output_buf_index++;
+    output_buffer[output_buf_index] = 0x00;
+
 
     return (output_buf_index + 1);
 }

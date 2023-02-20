@@ -19,8 +19,8 @@ void enable_carrier_wave(uint32_t SMCLK_freq, uint16_t desired_freq)
 {
     uint16_t period = find_best_prescaler(SMCLK_freq, desired_freq);
 
-    TA0CCR0 = period;      //period
-    TA0CCR2 = period / 3;  //duty cycle
+    TA0CCR0 = (period - 1);      //period
+    TA0CCR2 = (period - 1) / 3;  //duty cycle
     TA0EX0 = TAIDEX_0;      //divide by 1
     TA0CCTL0 = 0;
     TA0CCTL2 = OUTMOD_7;    //reset/set

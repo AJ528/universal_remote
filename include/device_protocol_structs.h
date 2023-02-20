@@ -43,10 +43,14 @@ struct device{
 };
 
 extern const struct device toshiba_tv;
+extern const struct device work_samsung_tv;
 extern const struct device soundbar;
 extern const struct device bluray;
+extern const struct device space_heater;
 extern const struct protocol NEC1;
 extern const struct protocol NEC2;
+extern const struct protocol NECx2;
 extern const struct protocol sony20;
+extern const struct protocol space_heater_protocol;
 
 #endif /* INCLUDE_DEVICE_PROTOCOL_STRUCTS_H_ */
