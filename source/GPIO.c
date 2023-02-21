@@ -112,8 +112,7 @@ void GPIO_LPM_prep(void)
     PCSEL0 = 0x0000;
     PDSEL0 = 0x0000;
 
-//    PAOUT = 0x0000;
-    PAOUT = 0x0008;
+    PAOUT = 0x0000;
     PBOUT = 0x0000;
     PCOUT = 0x0000;
     PDOUT = 0x0000;
