@@ -38,16 +38,21 @@ extern const struct btn_assoc btn_0x00;
 extern const struct btn_assoc btn_0x04;
 extern const struct btn_assoc btn_0x05;
 extern const struct btn_assoc btn_0x06;
+extern const struct btn_assoc btn_0x08;
 extern const struct btn_assoc btn_0x0C;
 extern const struct btn_assoc btn_0x0D;
 extern const struct btn_assoc btn_0x0E;
+extern const struct btn_assoc btn_0x0F;
 extern const struct btn_assoc btn_0x10;
 extern const struct btn_assoc btn_0x12;
 extern const struct btn_assoc btn_0x17;
+extern const struct btn_assoc btn_0x1B;
 extern const struct btn_assoc btn_0x1F;
 extern const struct btn_assoc btn_0x20;
 extern const struct btn_assoc btn_0x22;
 extern const struct btn_assoc btn_0x27;
+extern const struct btn_assoc btn_0x2E;
+extern const struct btn_assoc btn_0x2F;
 
 
 #endif /* INCLUDE_CMD_PROT_STRUCTS_H_ */

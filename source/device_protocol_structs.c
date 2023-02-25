@@ -8,6 +8,8 @@
 #include "device_protocol_structs.h"
 #include "IR_lib.h"
 
+//device = 0x40
+//subdevice = 0xBF
 const struct device toshiba_tv =
 {
  .device = {0xAA, 0xA8, 0x80},
@@ -35,6 +37,8 @@ const struct device soundbar =
  .prot_used = &NEC1
 };
 
+//device = 0x1a
+//subdevice = 0xe2
 const struct device bluray =
 {
  .device = {0xb5, 0xb0},

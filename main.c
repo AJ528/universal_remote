@@ -9,6 +9,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/*
+ * TODO:
+ * set up watchdog
+ * add blu-ray commands
+ */
+
 int main(void) {
 
     WDT_A_hold(WDT_A_BASE);
@@ -22,15 +28,15 @@ int main(void) {
     SYSCFG1 = IRMSEL | IREN;    //configure IR modulation to source data from UCA0, FSK mode, normal polarity, and enabled
     __enable_interrupt();
 
-    const struct btn_assoc * action;
+    const struct btn_assoc * assoc;
 
     while(1){
 
         uint16_t button_num = scan_for_pressed_button();
         if(button_num != 0xffff){
-            action = get_command(button_num);
-            if(action != 0){
-                handle_btn_assoc(action);
+            assoc = get_command(button_num);
+            if((assoc != 0) && (assoc->action != 0)){
+                handle_btn_assoc(assoc);
             }
         }else{
             reset_prev_cmd();

@@ -13,10 +13,14 @@ static const struct command SB_PWR_TOG;
 static const struct command SB_VLUP;
 static const struct command SB_VLDN;
 static const struct command SB_MUTE;
+static const struct command SB_SOURCE;
+
 
 static const struct command BR_PWR_TOG;
 static const struct command BR_PWR_ON;
 static const struct command BR_PWR_OFF;
+static const struct command BR_SELECT;
+static const struct command BR_EJECT;
 
 static const struct command SH_PWR_TOG;
 static const struct command SH_HL_TOG;
@@ -26,6 +30,8 @@ static const struct command TV_PWR_TOG;
 static const struct command TV_PWR_ON;
 static const struct command TV_PWR_OFF;
 static const struct command TV_SOURCE;
+static const struct command TV_INPUT_HDMI1;
+static const struct command TV_INPUT_HDMI2;
 static const struct command TV_INPUT_HDMI3;
 static const struct command TV_UP;
 static const struct command TV_DOWN;
@@ -39,7 +45,7 @@ static const struct cmd_seq MASTER_OFF;
 
 const struct btn_assoc btn_0x00 =
 {
- .action = (void *)&SH_PWR_TOG,
+ .action = (void *)0,
  .type = command
 };
 
@@ -61,6 +67,12 @@ const struct btn_assoc btn_0x06 =
  .type = command
 };
 
+const struct btn_assoc btn_0x08 =
+{
+ .action = (void *)&SB_PWR_TOG,
+ .type = command
+};
+
 const struct btn_assoc btn_0x0C =
 {
  .action = (void *)&SB_VLDN,
@@ -79,22 +91,34 @@ const struct btn_assoc btn_0x0E =
  .type = command
 };
 
+const struct btn_assoc btn_0x0F =
+{
+ .action = (void *)&BR_PWR_TOG,
+ .type = command
+};
+
 const struct btn_assoc btn_0x10 =
 {
- .action = (void *)&SB_PWR_TOG,
+ .action = (void *)&TV_INPUT_HDMI1,
  .type = command
 };
 
 const struct btn_assoc btn_0x12 =
 {
- .action = (void *)&SAM_TV_PWR_TOG,
+ .action = (void *)&TV_PWR_TOG,
  .type = command
 };
 
 const struct btn_assoc btn_0x17 =
 {
- .action = (void *)&watch_CC,
- .type = cmd_seq
+ .action = (void *)&TV_INPUT_HDMI2,
+ .type = command
+};
+
+const struct btn_assoc btn_0x1B =
+{
+ .action = (void *)&BR_EJECT,
+ .type = command
 };
 
 const struct btn_assoc btn_0x1F =
@@ -117,8 +141,20 @@ const struct btn_assoc btn_0x22 =
 
 const struct btn_assoc btn_0x27 =
 {
- .action = (void *)&MASTER_OFF,
- .type = cmd_seq
+ .action = (void *)&TV_INPUT_HDMI3,
+ .type = command
+};
+
+const struct btn_assoc btn_0x2E =
+{
+ .action = (void *)&BR_SELECT,
+ .type = command
+};
+
+const struct btn_assoc btn_0x2F =
+{
+ .action = (void *)&SH_PWR_TOG,
+ .type = command
 };
 
 /*
@@ -155,6 +191,7 @@ static const struct cmd_seq MASTER_OFF =
  * Blu-Ray Commands
  */
 
+//function = 0x15
 static const struct command BR_PWR_TOG =
 {
  .function = {0xd6, 0xb5, 0x00},
@@ -162,6 +199,7 @@ static const struct command BR_PWR_TOG =
  .device = &bluray
 };
 
+//function = 0x2e
 static const struct command BR_PWR_ON =
 {
  .function = {0xb6, 0xd6, 0x80},
@@ -169,6 +207,7 @@ static const struct command BR_PWR_ON =
  .device = &bluray
 };
 
+//function = 0x2f
 static const struct command BR_PWR_OFF =
 {
  .function = {0xdb, 0x6b, 0x40},
@@ -176,10 +215,27 @@ static const struct command BR_PWR_OFF =
  .device = &bluray
 };
 
+//function = 0x3d
+static const struct command BR_SELECT =
+{
+ .function = {0xd6, 0xdb, 0x40},
+ .function_len = 19,
+ .device = &bluray
+};
+
+//function = 0x16
+static const struct command BR_EJECT =
+{
+ .function = {0xb6, 0xb5, 0x00},
+ .function_len = 17,
+ .device = &bluray
+};
+
 /*
  * SoundBar Commands
  */
 
+//function = 0x40
 static const struct command SB_PWR_TOG =
 {
  .function = {0xaa, 0xa8, 0xa2, 0x22, 0x22, 0x28},
@@ -187,6 +243,7 @@ static const struct command SB_PWR_TOG =
  .device = &soundbar
 };
 
+//function = 0x41
 static const struct command SB_VLUP =
 {
  .function = {0x8a, 0xaa, 0x2a, 0x22, 0x22, 0x28},
@@ -194,6 +251,7 @@ static const struct command SB_VLUP =
  .device = &soundbar
 };
 
+//function = 0x45
 static const struct command SB_VLDN =
 {
  .function = {0x8a, 0x2a, 0x8a, 0x8a, 0x22, 0x28},
@@ -201,9 +259,18 @@ static const struct command SB_VLDN =
  .device = &soundbar
 };
 
+//function = 0x48
 static const struct command SB_MUTE =
 {
  .function = {0xaa, 0x2a, 0x28, 0x88, 0xa2, 0x28},
+ .function_len = 48,
+ .device = &soundbar
+};
+
+//function = 0x44
+static const struct command SB_SOURCE =
+{
+ .function = {0xa8, 0xaa, 0x28, 0x8a, 0x22, 0x28},
  .function_len = 48,
  .device = &soundbar
 };
@@ -261,6 +328,20 @@ static const struct command TV_PWR_OFF =
 static const struct command TV_SOURCE =
 {
  .function = {0x88, 0x88, 0xaa, 0xaa, 0x88, 0x88},
+ .function_len = 48,
+ .device = &toshiba_tv
+};
+
+static const struct command TV_INPUT_HDMI1 =
+{
+ .function = {0x8a, 0xa8, 0xaa, 0x22, 0x22, 0x88},
+ .function_len = 48,
+ .device = &toshiba_tv
+};
+
+static const struct command TV_INPUT_HDMI2 =
+{
+ .function = {0xa2, 0xa8, 0xa8, 0xa2, 0x22, 0x88},
  .function_len = 48,
  .device = &toshiba_tv
 };

@@ -6,7 +6,6 @@
  */
 
 #include "cmd_assoc_structs.h"
-//#include "IR_lib.h"
 
 static struct btn_assoc const *const button_map[64] =
 {
@@ -18,14 +17,14 @@ static struct btn_assoc const *const button_map[64] =
  &btn_0x05,
  &btn_0x06,
  0,
- 0,     //0x08
+ &btn_0x08,     //0x08
  0,
  0,
  0,
  &btn_0x0C,
  &btn_0x0D,
  &btn_0x0E,
- 0,
+ &btn_0x0F,
  &btn_0x10,     //0x10
  0,
  &btn_0x12,
@@ -37,7 +36,7 @@ static struct btn_assoc const *const button_map[64] =
  0,     //0x18
  0,
  0,
- 0,
+ &btn_0x1B,
  0,
  0,
  0,
@@ -56,8 +55,8 @@ static struct btn_assoc const *const button_map[64] =
  0,
  0,
  0,
- 0,
- 0,
+ &btn_0x2E,
+ &btn_0x2F,
  0,     //0x30
  0,
  0,
