@@ -34,25 +34,37 @@ struct command{
     const struct device *device;
 };
 
-extern const struct btn_assoc btn_0x00;
-extern const struct btn_assoc btn_0x04;
-extern const struct btn_assoc btn_0x05;
-extern const struct btn_assoc btn_0x06;
-extern const struct btn_assoc btn_0x08;
-extern const struct btn_assoc btn_0x0C;
-extern const struct btn_assoc btn_0x0D;
-extern const struct btn_assoc btn_0x0E;
-extern const struct btn_assoc btn_0x0F;
-extern const struct btn_assoc btn_0x10;
-extern const struct btn_assoc btn_0x12;
-extern const struct btn_assoc btn_0x17;
-extern const struct btn_assoc btn_0x1B;
-extern const struct btn_assoc btn_0x1F;
-extern const struct btn_assoc btn_0x20;
-extern const struct btn_assoc btn_0x22;
-extern const struct btn_assoc btn_0x27;
-extern const struct btn_assoc btn_0x2E;
-extern const struct btn_assoc btn_0x2F;
+extern const struct command SB_PWR_TOG;
+extern const struct command SB_VLUP;
+extern const struct command SB_VLDN;
+extern const struct command SB_MUTE;
+extern const struct command SB_SOURCE;
 
+
+extern const struct command BR_PWR_TOG;
+extern const struct command BR_PWR_ON;
+extern const struct command BR_PWR_OFF;
+extern const struct command BR_SELECT;
+extern const struct command BR_EJECT;
+
+extern const struct command SH_PWR_TOG;
+extern const struct command SH_HL_TOG;
+extern const struct command SH_OSC;
+
+extern const struct command TV_PWR_TOG;
+extern const struct command TV_PWR_ON;
+extern const struct command TV_PWR_OFF;
+extern const struct command TV_SOURCE;
+extern const struct command TV_INPUT_HDMI1;
+extern const struct command TV_INPUT_HDMI2;
+extern const struct command TV_INPUT_HDMI3;
+extern const struct command TV_UP;
+extern const struct command TV_DOWN;
+extern const struct command TV_SELECT;
+
+extern const struct command SAM_TV_PWR_TOG;
+
+extern const struct cmd_seq watch_CC;
+extern const struct cmd_seq MASTER_OFF;
 
 #endif /* INCLUDE_CMD_PROT_STRUCTS_H_ */
