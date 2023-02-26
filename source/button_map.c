@@ -16,7 +16,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x01
   //button name: PLAY
-   .action = (void *)0,
+   .action = (void *)&BR_PLAY,
    .type = command
  },
  {//index 0x02
@@ -26,7 +26,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x03
   //button name: REWIND
-   .action = (void *)0,
+   .action = (void *)&BR_PREV,
    .type = command
  },
  {//index 0x04
@@ -161,7 +161,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x1e
   //button name: UP
-   .action = (void *)0,
+   .action = (void *)&BR_UP,
    .type = command
  },
  {//index 0x1f
@@ -176,7 +176,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x21
   //button name: PAUSE
-   .action = (void *)0,
+   .action = (void *)&BR_PAUSE,
    .type = command
  },
  {//index 0x22
@@ -186,7 +186,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x23
   //button name: FAST-FORWARD
-   .action = (void *)0,
+   .action = (void *)&BR_NEXT,
    .type = command
  },
  {//index 0x24
@@ -201,7 +201,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x26
   //button name: DOWN
-   .action = (void *)0,
+   .action = (void *)&BR_DOWN,
    .type = command
  },
  {//index 0x27
@@ -216,7 +216,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x29
   //button name: CLOSED-CAPTIONS
-   .action = (void *)0,
+   .action = (void *)&BR_SUBTITLE,
    .type = command
  },
  {//index 0x2a
@@ -226,17 +226,17 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x2b
   //button name: STOP
-   .action = (void *)0,
+   .action = (void *)&BR_STOP,
    .type = command
  },
  {//index 0x2c
   //button name: LEFT
-   .action = (void *)0,
+   .action = (void *)&BR_LEFT,
    .type = command
  },
  {//index 0x2d
   //button name: RIGHT
-   .action = (void *)0,
+   .action = (void *)&BR_RIGHT,
    .type = command
  },
  {//index 0x2e

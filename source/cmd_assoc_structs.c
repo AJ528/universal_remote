@@ -66,11 +66,91 @@ const struct command BR_PWR_OFF =
  .device = &bluray
 };
 
+//function = 0x1a
+const struct command BR_PLAY =
+{
+ .function = {0xb5, 0xb5, 0x00},
+ .function_len = 17,
+ .device = &bluray
+};
+
+//function = 0x19
+const struct command BR_PAUSE =
+{
+ .function = {0xd5, 0xb5, 0x00},
+ .function_len = 17,
+ .device = &bluray
+};
+
+//function = 0x18
+const struct command BR_STOP =
+{
+ .function = {0xab, 0x6a},
+ .function_len = 16,
+ .device = &bluray
+};
+
+//function = 0x56
+const struct command BR_NEXT =
+{
+ .function = {0xb6, 0xb5, 0x80},
+ .function_len = 18,
+ .device = &bluray
+};
+
+//function = 0x57
+const struct command BR_PREV =
+{
+ .function = {0xdb, 0x5a, 0xc0},
+ .function_len = 19,
+ .device = &bluray
+};
+
+//function = 0x39
+const struct command BR_UP =
+{
+ .function = {0xd5, 0xb6, 0x80},
+ .function_len = 18,
+ .device = &bluray
+};
+
+//function = 0x3a
+const struct command BR_DOWN =
+{
+ .function = {0xb5, 0xb6, 0x80},
+ .function_len = 18,
+ .device = &bluray
+};
+
+//function = 0x3b
+const struct command BR_LEFT =
+{
+ .function = {0xda, 0xdb, 0x40},
+ .function_len = 19,
+ .device = &bluray
+};
+
+//function = 0x3c
+const struct command BR_RIGHT =
+{
+ .function = {0xad, 0xb6, 0x80},
+ .function_len = 18,
+ .device = &bluray
+};
+
 //function = 0x3d
 const struct command BR_SELECT =
 {
  .function = {0xd6, 0xdb, 0x40},
  .function_len = 19,
+ .device = &bluray
+};
+
+//function = 0x63
+const struct command BR_SUBTITLE =
+{
+ .function = {0xda, 0xad, 0x80},
+ .function_len = 18,
  .device = &bluray
 };
 

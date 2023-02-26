@@ -44,7 +44,17 @@ extern const struct command SB_SOURCE;
 extern const struct command BR_PWR_TOG;
 extern const struct command BR_PWR_ON;
 extern const struct command BR_PWR_OFF;
+extern const struct command BR_PLAY;
+extern const struct command BR_PAUSE;
+extern const struct command BR_STOP;
+extern const struct command BR_NEXT;
+extern const struct command BR_PREV;
+extern const struct command BR_UP;
+extern const struct command BR_DOWN;
+extern const struct command BR_LEFT;
+extern const struct command BR_RIGHT;
 extern const struct command BR_SELECT;
+extern const struct command BR_SUBTITLE;
 extern const struct command BR_EJECT;
 
 extern const struct command SH_PWR_TOG;
