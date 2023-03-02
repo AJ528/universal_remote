@@ -52,12 +52,13 @@ static const struct btn_assoc button_map[48] =
   //button name: REWIND
   .sp_cmd =
   {
-   .action = (void *)&BR_PREV,
+   .action = (void *)&BR_SCAN_REV,
    .type = command
   },
   .lp_cmd =
   {
-   .action = (void *)0,
+   .action = (void *)&BR_PREV,
+//   .action = (void *)0,
    .type = command
   }
  },
@@ -122,7 +123,7 @@ static const struct btn_assoc button_map[48] =
   },
   .lp_cmd =
   {
-   .action = (void *)0,
+   .action = (void *)&BR_PWR_TOG,
    .type = command
   }
  },
@@ -468,12 +469,13 @@ static const struct btn_assoc button_map[48] =
   //button name: FAST-FORWARD
   .sp_cmd =
   {
-   .action = (void *)&BR_NEXT,
+   .action = (void *)&BR_SCAN_FWD,
    .type = command
   },
   .lp_cmd =
   {
-   .action = (void *)0,
+   .action = (void *)&BR_NEXT,
+//   .action = (void *)0,
    .type = command
   }
  },

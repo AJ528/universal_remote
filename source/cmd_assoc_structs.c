@@ -90,6 +90,22 @@ const struct command BR_STOP =
  .device = &bluray
 };
 
+//function = 0x53
+const struct command BR_SCAN_REV =
+{
+ .function = {0xda, 0xda, 0x80},
+ .function_len = 18,
+ .device = &bluray
+};
+
+//function = 0x54
+const struct command BR_SCAN_FWD =
+{
+ .function = {0xad, 0xb5, 0x00},
+ .function_len = 17,
+ .device = &bluray
+};
+
 //function = 0x56
 const struct command BR_NEXT =
 {

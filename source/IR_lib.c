@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define LONG_PRESS_THRESH   150
+#define LONG_PRESS_THRESH   75
 #define OUTPUT_BUF_SIZE     32
 
 uint8_t output_buf[OUTPUT_BUF_SIZE] = {0};
@@ -72,8 +72,10 @@ static bool button_is_long_pressed(uint16_t button_num)
     start_10ms_inc_timer(LONG_PRESS_THRESH);
 
     while(!timer_expired()){
-        if(scan_for_pressed_button() != button_num)
+        if(scan_for_pressed_button() != button_num){
             button_remains_pressed = false;
+            expire_timer();
+        }
     }
 
     return button_remains_pressed;
@@ -150,7 +152,7 @@ int16_t execute_command(const struct command *cmd, bool is_ditto)
     if(extent != 0)
         start_extent_timer(extent);
     else
-        set_timer_expired();
+        expire_timer();
 
     TXData_size = result;
     TXData_index = 0;

@@ -54,6 +54,8 @@ extern const struct command BR_PWR_OFF;
 extern const struct command BR_PLAY;
 extern const struct command BR_PAUSE;
 extern const struct command BR_STOP;
+extern const struct command BR_SCAN_REV;
+extern const struct command BR_SCAN_FWD;
 extern const struct command BR_NEXT;
 extern const struct command BR_PREV;
 extern const struct command BR_UP;

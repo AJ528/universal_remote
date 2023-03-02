@@ -17,8 +17,8 @@ inline void stop_carrier_wave(void);
 
 void start_extent_timer(uint16_t ms_delay);
 void start_10ms_inc_timer(uint16_t ms10_delay);
-inline bool timer_expired(void);
-inline void set_timer_expired(void);
+bool timer_expired(void);
+void expire_timer(void);
 
 
 

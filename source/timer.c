@@ -51,13 +51,14 @@ void start_10ms_inc_timer(uint16_t ms10_delay)
     TA1CTL = TASSEL__ACLK | ID__2 | MC__UP;    //aclk source, /2, interrupt count up
 }
 
-inline bool timer_expired(void)
+bool timer_expired(void)
 {
     return local_timer_expired;
 }
 
-inline void set_timer_expired(void)
+void expire_timer(void)
 {
+    TA1CTL = MC__STOP | TACLR;
     local_timer_expired = true;
 }
 
