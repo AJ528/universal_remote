@@ -16,9 +16,10 @@
 
 const struct btn_assoc * get_command(uint16_t button_num);
 
-int16_t handle_btn_assoc(struct btn_assoc const *container);
+int16_t handle_button_assoc(struct btn_assoc const *assoc, uint16_t button_num);
+int16_t handle_cmd_container(struct cmd_container const *container);
 int16_t execute_command(const struct command *cmd, bool is_ditto);
-inline void reset_prev_cmd(void);
+void reset_prev_cmd(void);
 int16_t format_sony20_command(uint8_t *output_buffer, uint16_t output_buffer_size,
                               const struct stream_char *cur_char,
                               const struct command *cmd, bool is_ditto);

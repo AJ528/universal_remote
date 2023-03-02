@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#define LONG_PRESS_THRESH   150
 #define OUTPUT_BUF_SIZE     32
 
 uint8_t output_buf[OUTPUT_BUF_SIZE] = {0};
@@ -27,7 +28,7 @@ uint16_t TXData_size;
 
 static struct command const *prev_cmd = 0;
 
-
+static bool button_is_long_pressed(uint16_t button_num);
 static void append_bits(uint8_t *output, uint16_t *output_index,
                         uint8_t *output_bit_index, const uint8_t *input,
                         uint16_t input_bit_len);
@@ -37,7 +38,48 @@ static void shift_in_byte(uint8_t *output, uint16_t *output_index,
                              uint8_t pat_len);
 static void clear_buffer(uint8_t *buffer, uint16_t size);
 
-int16_t handle_btn_assoc(struct btn_assoc const *container)
+int16_t handle_button_assoc(struct btn_assoc const *assoc, uint16_t button_num)
+{
+    //if assoc has an entry for a long-press
+    //start a timer
+    //check to see if button remains pressed for time T
+    //if button is released before T seconds, execute short press
+    //else, execute long press after T seconds
+    //spam command as long as button is held down
+
+    bool lp_result = false;
+    //if a long-press command action exists
+    if(assoc->lp_cmd.action != 0){
+        lp_result = button_is_long_pressed(button_num);
+    }
+
+    if(lp_result){
+        while(scan_for_pressed_button() == button_num){
+            handle_cmd_container(&(assoc->lp_cmd));
+        }
+        reset_prev_cmd();
+        return (0);
+    }else if(assoc->sp_cmd.action != 0){
+        return handle_cmd_container(&(assoc->sp_cmd));
+    }else
+        return (0);
+}
+
+static bool button_is_long_pressed(uint16_t button_num)
+{
+    bool button_remains_pressed = true;
+
+    start_10ms_inc_timer(LONG_PRESS_THRESH);
+
+    while(!timer_expired()){
+        if(scan_for_pressed_button() != button_num)
+            button_remains_pressed = false;
+    }
+
+    return button_remains_pressed;
+}
+
+int16_t handle_cmd_container(struct cmd_container const *container)
 {
     struct cmd_seq const *cmd_seq_to_execute;
     struct command const *cmd_to_execute;
@@ -67,7 +109,7 @@ int16_t handle_btn_assoc(struct btn_assoc const *container)
     return (0);
 }
 
-inline void reset_prev_cmd(void)
+void reset_prev_cmd(void)
 {
     prev_cmd = 0;
 }
@@ -108,7 +150,7 @@ int16_t execute_command(const struct command *cmd, bool is_ditto)
     if(extent != 0)
         start_extent_timer(extent);
     else
-        set_extent_passed();
+        set_timer_expired();
 
     TXData_size = result;
     TXData_index = 0;
@@ -120,18 +162,10 @@ int16_t execute_command(const struct command *cmd, bool is_ditto)
 
     clear_buffer(output_buf, TXData_size);
 
-//    while(extent_passed() == false){
-//        __no_operation();
-//    }
-
-    if(extent_passed() == false){
+    if(timer_expired() == false){
         //enter LPM3 and wait for the extent time period to pass
         __bis_SR_register(LPM3_bits);
-        //temporarily using LMP0 instead of LPM3
-//        __bis_SR_register(LPM0_bits);
     }
-
-    reset_extent_passed();
 
     return (0);
 }

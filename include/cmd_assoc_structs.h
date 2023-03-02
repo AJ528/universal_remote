@@ -18,9 +18,16 @@ enum action_type{
     cmd_seq
 };
 
-struct btn_assoc{
+struct cmd_container{
     void *action;
     enum action_type type;
+};
+
+//sp_cmd = short-press command
+//lp_cmd = long-press command
+struct btn_assoc{
+    struct cmd_container sp_cmd;
+    struct cmd_container lp_cmd;
 };
 
 struct cmd_seq{
