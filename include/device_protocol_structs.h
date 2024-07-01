@@ -43,7 +43,7 @@ struct device{
 };
 
 extern const struct device toshiba_tv;
-extern const struct device work_samsung_tv;
+extern const struct device samsung_tv;
 extern const struct device soundbar;
 extern const struct device bluray;
 extern const struct device space_heater;

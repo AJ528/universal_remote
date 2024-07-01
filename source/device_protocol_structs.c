@@ -19,7 +19,7 @@ const struct device toshiba_tv =
  .prot_used = &NEC1
 };
 
-const struct device work_samsung_tv =
+const struct device samsung_tv =
 {
  .device = {0x88, 0x8A, 0xA8},
  .device_len = 22,

@@ -91,7 +91,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x10
   //button name: 1
-  .action = (void *)&TV_INPUT_HDMI1,
+  .action = (void *)&LH_TV_INPUT_HDMI1,
   .type = command
  },
  {//index 0x11
@@ -101,7 +101,7 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x12
   //button name: POWER
-   .action = (void *)&TV_PWR_TOG,
+   .action = (void *)&LH_TV_PWR_TOG,
    .type = command
  },
  {//index 0x13
@@ -126,11 +126,11 @@ static const struct btn_assoc button_map[48] =
  },
  {//index 0x17
   //button name: 2
-   .action = (void *)&TV_INPUT_HDMI2,
+   .action = (void *)&LH_TV_PWR,
    .type = command
  },
  {//index 0x18
-  //button name: —
+  //button name: -
    .action = (void *)0,
    .type = command
  },

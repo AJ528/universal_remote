@@ -232,6 +232,32 @@ const struct command SH_OSC =
 };
 
 /*
+ * Lakehouse TV Commands
+ */
+
+const struct command LH_TV_PWR_TOG =
+{
+ .function = {0xa2, 0x2a, 0x22, 0x22, 0xa2, 0x2a},
+ .function_len = 48,
+ .device = &samsung_tv
+};
+
+const struct command LH_TV_PWR =
+{
+ .function = {0xa2, 0xaa, 0xa2, 0x8a, 0x88, 0x88},
+ .function_len = 48,
+ .device = &samsung_tv
+};
+
+const struct command LH_TV_INPUT_HDMI1 =
+{
+ .function = {0x8a, 0x8a, 0x22, 0x28, 0x8a, 0x2a},
+ .function_len = 48,
+ .device = &samsung_tv
+};
+
+
+/*
  * TV Commands
  */
 
@@ -310,9 +336,9 @@ const struct command TV_SELECT =
  * Work Samsung TV Commands
  */
 
-const struct command SAM_TV_PWR_TOG =
-{
- .function = {0xa2, 0xaa, 0xa2, 0x88, 0x88, 0x88},
- .function_len = 48,
- .device = &work_samsung_tv
-};
+// const struct command SAM_TV_PWR_TOG =
+// {
+//  .function = {0xa2, 0xaa, 0xa2, 0x88, 0x88, 0x88},
+//  .function_len = 48,
+//  .device = &work_samsung_tv
+// };

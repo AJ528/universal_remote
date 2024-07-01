@@ -61,6 +61,10 @@ extern const struct command SH_PWR_TOG;
 extern const struct command SH_HL_TOG;
 extern const struct command SH_OSC;
 
+extern const struct command LH_TV_PWR_TOG;
+extern const struct command LH_TV_PWR;
+extern const struct command LH_TV_INPUT_HDMI1;
+
 extern const struct command TV_PWR_TOG;
 extern const struct command TV_PWR_ON;
 extern const struct command TV_PWR_OFF;
