@@ -1,6 +1,7 @@
 
 *.TMP
 .settings/
+.clangd
 
 Debug/
 Release/
